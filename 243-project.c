@@ -118,6 +118,7 @@ void draw_board();
 void draw_rack();
 void highlight_tile(int x, int y);
 void video_text(int x, int y, char * text_ptr);
+void color_tiles(int row, int col);
 
 volatile int pixel_buffer_start; // global variable
 const char *letters[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
@@ -130,9 +131,13 @@ int main(void) {
     pixel_buffer_start = *pixel_ctrl_ptr;
 
     volatile int *PS2_ptr = (int*)0xFF200100;
-    int PS2_data, RVALID;
+
+    volatile int *SW_ptr = (int *)0xFF200040;
+    int PS2_data, SW_data, RVALID;
     char input = 0;
 	char input2 = 0;
+    char pattern = 0;
+
 
     int x, y;
     x = 7;
@@ -142,6 +147,12 @@ int main(void) {
 
     draw_board();
     draw_rack();
+
+    for (int i = 0; i < 15; i++) {
+        for (int j = 0; j < 15; j++) {
+            color_tiles(i, j);
+        }
+    }
 
     // setup text
     video_text(18, 2, "COME PLAY A GAME OF SCRABBLE!");
@@ -195,7 +206,7 @@ int main(void) {
          if (RVALID) {
             input2 = PS2_data & 0xFFFF;
 		
-        //LEFT ARROW
+            //LEFT ARROW
             if (input2 == (char)0xE06B) {
                 while (1) {
                     PS2_data = *(PS2_ptr);
@@ -218,24 +229,24 @@ int main(void) {
                 }
             }
 
-        //RIGHT ARROW
-                    if (input2 == (char)0xE074) {
-                while (1) {
-                    PS2_data = *(PS2_ptr);
-                    RVALID = PS2_data & 0x8000;
+            //RIGHT ARROW
+                if (input2 == (char)0xE074) {
+                    while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
 
-                    if (RVALID) {
-                        input2 = PS2_data & 0xFFFFFF;
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
 
-                        //if the key is released
-                        if (input2 == (char)0xE0F074) {
-                            //move select highlight to the left
-                            draw_board();
-                            if (x < 14) {
-								x++;
-							}
+                            //if the key is released
+                            if (input2 == (char)0xE0F074) {
+                                //move select highlight to the left
+                                draw_board();
+                                if (x < 14) {
+								    x++;
+							    }
                             highlight_tile(x, y);
-                             break;
+                            break;
                         }
                     }
                 }
@@ -287,6 +298,19 @@ int main(void) {
                 }
             }
          }
+
+
+        SW_data = *(SW_ptr);
+        RVALID = SW_data & 0x8000;
+
+        if (RVALID) {
+             pattern = SW_data & 0xFFFF;
+		
+            //LEFT ARROW
+            if (pattern & 0x00000001) {
+               clear_screen();
+            }
+        }
     }
 }
 
@@ -310,6 +334,72 @@ void draw_rack() {
     }
 }
 
+void color_tiles(int row, int col) {
+    if (row == 0 ||  row == 14) {
+        if (col == 0 || col == 7 || col == 14) {
+            color_square(row, col, MAGENTA);
+        }
+    }
+    if (row == 8 && (col == 0 || col == 14)) {
+        color_square(row, col, MAGENTA);
+    }
+
+    if (row == 1 || row == 2 || row == 3 || row == 4 || row ==7 || row == 10 || row == 11 || row == 12 || row == 13) {
+        if (col == 1 || col == 2 || col == 3 || col == 4 || col ==7 || col == 10 || col == 11 || col == 12 || col == 13) {
+             if (row == col) {
+                color_square(row, col, PINK);
+             }
+
+             if ((row == 13 && col == 1) || (row == 12 && col == 2) || (row == 11 && col == 3) || (row == 10 && col == 4)) {
+                 color_square(row, col, PINK);
+             }
+
+             if ((col == 13 && row == 1) || (col == 12 && row == 2) || (col == 11 && row == 3) || (col == 10 && row == 4)) {
+                 color_square(row, col, PINK);
+             }
+        }
+    }
+
+    if ((row == 0 || row == 14 || row == 7) && (col == 3 || col == 11)) {
+        color_square(row, col, CYAN);
+    }
+
+    if ((row == 2 || row == 12) && (col == 6 || col == 8)) {
+        color_square(row, col, CYAN);
+    }
+
+    if ((row == 3 || row == 11) && (col == 0 || col == 7 || col == 14)) {
+        color_square(row, col, CYAN);
+    }
+
+    if ((row == 6 || row == 8) && (col == 2 || col == 6 || col == 8 || col == 12)) {
+        color_square(row, col, CYAN);
+    }
+
+    if ((row == 1 || row == 14) && (col == 5 || col == 9)) {
+        color_square(row, col, BLUE);
+    }
+
+    if ((row == 5 || row == 9) && (col == 5 || col == 9 || col == 1 || col == 13)) {
+        color_square(row, col, BLUE);
+    }
+
+}
+
+void color_square(int x, int y, short int color) {
+     int x_coord = 68 + 12*x;
+    int y_coord = 21 + 12*y;
+
+    for (int i = 0; i < 12; i++) {
+        draw_line(x_coord+1, y_coord+1+i, x_coord+11, y_coord+1+i, color); //top line
+    }
+
+    //draw_line(x_coord, y_coord, x_coord+12, y_coord, RED); //top line
+    //draw_line(x_coord, y_coord+12, x_coord+12, y_coord+12, RED); // bottom line
+    //draw_line(x_coord, y_coord, x_coord, y_coord+12, RED); //left line
+    //draw_line(x_coord+12, y_coord, x_coord+12, y_coord+12, RED); //right line
+}
+
 // void draw_board() {
 //     for (int i = 47; i < 274; i+= 15) {
 //         draw_line(i, 7, i, 232, WHITE);
@@ -322,13 +412,13 @@ void draw_rack() {
 
 void highlight_tile(int x, int y) {
 
-    int x_coord = 47 + 15*x;
-    int y_coord = 7 + 15*y;
+    int x_coord = 68 + 12*x;
+    int y_coord = 21 + 12*y;
 
-    draw_line(x_coord, y_coord, x_coord+15, y_coord, RED); //top line
-    draw_line(x_coord, y_coord+15, x_coord+15, y_coord+15, RED); // bottom line
-    draw_line(x_coord, y_coord, x_coord, y_coord+15, RED); //left line
-    draw_line(x_coord+15, y_coord, x_coord+15, y_coord+15, RED); //right line
+    draw_line(x_coord, y_coord, x_coord+12, y_coord, RED); //top line
+    draw_line(x_coord, y_coord+12, x_coord+12, y_coord+12, RED); // bottom line
+    draw_line(x_coord, y_coord, x_coord, y_coord+12, RED); //left line
+    draw_line(x_coord+12, y_coord, x_coord+12, y_coord+12, RED); //right line
 }
 
 
@@ -347,6 +437,11 @@ void video_text(int x, int y, char * text_ptr) {
 }
 
 // -------------------------------------------------------------
+
+
+
+
+
 
 void clear_screen() {
     for (int x = 0; x<320; x++) {
