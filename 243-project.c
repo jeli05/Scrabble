@@ -144,15 +144,18 @@ int main(void) {
     draw_rack();
 
     // setup text
+    srand(time(NULL));
     video_text(18, 2, "COME PLAY A GAME OF SCRABBLE!");
 
     video_text(1, 1, "PLAYER 1");
     video_text(1, 3, "SCORE: ");
-    video_text(8, 3, "76"); // to be updated after each turn
+    char str1[3];
+    sprintf(str1, "%d", rand() % 300);
+    video_text(8, 3, str1); // to be updated after each turn
 
     video_text(66, 1, "PLAYER 2");
     video_text(66, 3, "SCORE: ");
-    video_text(75, 3, "108"); // to be updated after each turn
+    video_text(73, 3, str1); // to be updated after each turn
 
     // show/hide player turn message
     video_text(1, 52, "PLAYER 1 TURN");
@@ -162,8 +165,11 @@ int main(void) {
     // video_text(66, 52, "             ");
 
     video_text(29, 52, "THESE ARE YOUR TILES:");
-    video_text(30, 55, "T  S  E  E  T  R  L"); // placeholder text at the moment for visualization
-    video_text(31, 56, "1  1  1  1  1  1  1"); // placeholder text at the moment for visualization
+    for (int i = 30; i < 30 + 3*7; i += 3) { // randomly generated tiles
+        int num = rand() % 26;
+		video_text(i, 55, letters[num]);
+        video_text(i+1, 56, values[num]);
+	}
 
     int letter = 0;
     for (int i = 18; i < 61; i += 3) {
@@ -310,16 +316,6 @@ void draw_rack() {
     }
 }
 
-// void draw_board() {
-//     for (int i = 47; i < 274; i+= 15) {
-//         draw_line(i, 7, i, 232, WHITE);
-//     }
-
-//     for (int i = 7; i < 233; i+= 15) {
-//         draw_line(47, i, 273, i, WHITE);
-//     }
-// }
-
 void highlight_tile(int x, int y) {
 
     int x_coord = 47 + 15*x;
@@ -330,9 +326,6 @@ void highlight_tile(int x, int y) {
     draw_line(x_coord, y_coord, x_coord, y_coord+15, RED); //left line
     draw_line(x_coord+15, y_coord, x_coord+15, y_coord+15, RED); //right line
 }
-
-
-// -------------------------------------------------------------
 
 void video_text(int x, int y, char * text_ptr) {
     int offset;
@@ -345,8 +338,6 @@ void video_text(int x, int y, char * text_ptr) {
         ++offset;
     }
 }
-
-// -------------------------------------------------------------
 
 void clear_screen() {
     for (int x = 0; x<320; x++) {
