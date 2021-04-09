@@ -115,6 +115,7 @@ void draw_line(int x0, int y0, int x1, int y1, short int line_color);
 void plot_pixel(int x, int y, short int line_color);
 void draw_rectangle(int x,  int y);
 void draw_board();
+void highlight_tile(int x, int y);
 
 volatile int pixel_buffer_start; // global variable
 
@@ -123,20 +124,142 @@ int main(void) {
     /* Read location of the pixel buffer from the pixel buffer controller */
     pixel_buffer_start = *pixel_ctrl_ptr;
 
+    volatile int *PS2_ptr = (int*)0xFF200100;
+    int PS2_data, RVALID;
+    char input = 0;
+	char input2 = 0;
+
+    int x, y;
+    x = 7;
+    y = 7;
+
     clear_screen();
 
     draw_board();
 
+    highlight_tile(x, y);
+
+    while (1) {
+		PS2_data = *(PS2_ptr);
+        RVALID = PS2_data & 0x8000;
+
+         if (RVALID) {
+            input2 = PS2_data & 0xFFFF;
+		
+        //LEFT ARROW
+            if (input2 == (char)0xE06B) {
+                while (1) {
+                    PS2_data = *(PS2_ptr);
+                    RVALID = PS2_data & 0x8000;
+
+                    if (RVALID) {
+                        input2 = PS2_data & 0xFFFFFF;
+
+                        //if the key is released
+                        if (input2 == (char)0xE0F06B) {
+                            //move select highlight to the left
+                            draw_board();
+                            if (x > 0) {
+								x--;
+							}
+                            highlight_tile(x, y);
+                             break;
+                        }
+                    }
+                }
+            }
+
+        //RIGHT ARROW
+                    if (input2 == (char)0xE074) {
+                while (1) {
+                    PS2_data = *(PS2_ptr);
+                    RVALID = PS2_data & 0x8000;
+
+                    if (RVALID) {
+                        input2 = PS2_data & 0xFFFFFF;
+
+                        //if the key is released
+                        if (input2 == (char)0xE0F074) {
+                            //move select highlight to the left
+                            draw_board();
+                            if (x < 14) {
+								x++;
+							}
+                            highlight_tile(x, y);
+                             break;
+                        }
+                    }
+                }
+            }
+
+            //UP ARROW
+                        if (input2 == (char)0xE075) {
+                while (1) {
+                    PS2_data = *(PS2_ptr);
+                    RVALID = PS2_data & 0x8000;
+
+                    if (RVALID) {
+                        input2 = PS2_data & 0xFFFFFF;
+
+                        //if the key is released
+                        if (input2 == (char)0xE0F075) {
+                            //move select highlight to the left
+                            draw_board();
+                            if (y > 0) {
+								y--;
+							}
+                            highlight_tile(x, y);
+                             break;
+                        }
+                    }
+                }
+            }
+
+            //DOWN ARROW
+                        if (input2 == (char)0xE072) {
+                while (1) {
+                    PS2_data = *(PS2_ptr);
+                    RVALID = PS2_data & 0x8000;
+
+                    if (RVALID) {
+                        input2 = PS2_data & 0xFFFFFF;
+
+                        //if the key is released
+                        if (input2 == (char)0xE0F072) {
+                            //move select highlight to the left
+                            draw_board();
+                            if (y < 14) {
+								y++;
+							}
+                            highlight_tile(x, y);
+                            break;
+                        }
+                    }
+                }
+            }
+         }
+    }
 }
 
 void draw_board() {
-    for (int i = 47; i < 274; i+= 16) {
-        draw_line(i, 0, i, 239, 0xF800);
+    for (int i = 47; i < 274; i+= 15) {
+        draw_line(i, 7, i, 232, WHITE);
     }
 
-    for (int i = 7; i < 233; i+= 16) {
-        draw_line(0, i, 319, i, 0xF800);
+    for (int i = 7; i < 233; i+= 15) {
+        draw_line(47, i, 273, i, WHITE);
     }
+}
+
+void highlight_tile(int x, int y) {
+
+    int x_coord = 47 + 15*x;
+    int y_coord = 7 + 15*y;
+
+    draw_line(x_coord, y_coord, x_coord+15, y_coord, RED); //top line
+    draw_line(x_coord, y_coord+15, x_coord+15, y_coord+15, RED); // bottom line
+    draw_line(x_coord, y_coord, x_coord, y_coord+15, RED); //left line
+    draw_line(x_coord+15, y_coord, x_coord+15, y_coord+15, RED); //right line
 }
 
 
