@@ -115,9 +115,14 @@ void draw_line(int x0, int y0, int x1, int y1, short int line_color);
 void plot_pixel(int x, int y, short int line_color);
 void draw_rectangle(int x,  int y);
 void draw_board();
+void draw_rack();
 void highlight_tile(int x, int y);
+void video_text(int x, int y, char * text_ptr);
 
 volatile int pixel_buffer_start; // global variable
+const char *letters[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+const char *values[] = {"1", "3", "3", "3", "1", "4", "2", "4", "1", "8", "5", "1", "3", "1", "1", "3", "9", "1", "1", "1", "1", "4", "4", "8", "4", "9"};
+// const char *values[] = {1, 3, 3, 3, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3, 9, 1, 1, 1, 1, 4, 4, 8, 4, 9};
 
 int main(void) {
     volatile int * pixel_ctrl_ptr = (int *)0xFF203020;
@@ -136,6 +141,50 @@ int main(void) {
     clear_screen();
 
     draw_board();
+    draw_rack();
+
+    // setup text
+    video_text(18, 2, "COME PLAY A GAME OF SCRABBLE!");
+
+    video_text(1, 1, "PLAYER 1");
+    video_text(1, 3, "SCORE: ");
+    video_text(8, 3, "76"); // to be updated after each turn
+
+    video_text(66, 1, "PLAYER 2");
+    video_text(66, 3, "SCORE: ");
+    video_text(75, 3, "108"); // to be updated after each turn
+
+    // show/hide player turn message
+    video_text(1, 52, "PLAYER 1 TURN");
+    // video_text(1, 52, "             ");
+
+    video_text(66, 52, "PLAYER 2 TURN");
+    // video_text(66, 52, "             ");
+
+    video_text(29, 52, "THESE ARE YOUR TILES:");
+    video_text(30, 55, "T  S  E  E  T  R  L"); // placeholder text at the moment for visualization
+    video_text(31, 56, "1  1  1  1  1  1  1"); // placeholder text at the moment for visualization
+
+    int letter = 0;
+    for (int i = 18; i < 61; i += 3) {
+        for (int j = 6; j < 49; j+= 3) {
+            video_text(i, j, letters[letter]);
+            letter++;
+            if (letter == 26)
+                letter = 0;
+            // video_text(i, j, " "); // to clear whole board
+        }
+    }
+    int value = 0;
+    for (int i = 19; i < 62; i += 3) {
+        for (int j = 7; j < 50; j+= 3) {
+            video_text(i, j, values[value]);
+            value++;
+            if (value == 26)
+                value = 0;
+            // video_text(i, j, " "); // to clear whole board
+        } // Q and Z may need to be given values of 9 instead of 10, or we can use X to represent 10
+    }
 
     highlight_tile(x, y);
 
@@ -242,14 +291,34 @@ int main(void) {
 }
 
 void draw_board() {
-    for (int i = 47; i < 274; i+= 15) {
-        draw_line(i, 7, i, 232, WHITE);
+    for (int i = 68; i < 249; i+= 12) {
+        draw_line(i, 21, i, 201, WHITE);
     }
 
-    for (int i = 7; i < 233; i+= 15) {
-        draw_line(47, i, 273, i, WHITE);
+    for (int i = 21; i < 202; i+= 12) {
+        draw_line(68, i, 248, i, WHITE);
     }
 }
+
+void draw_rack() {
+    for (int i = 116; i <= 200; i+= 12) {
+        draw_line(i, 217, i, 229, WHITE);
+    }
+
+    for (int i = 217; i <= 229; i+= 12) {
+        draw_line(116, i, 200, i, WHITE);
+    }
+}
+
+// void draw_board() {
+//     for (int i = 47; i < 274; i+= 15) {
+//         draw_line(i, 7, i, 232, WHITE);
+//     }
+
+//     for (int i = 7; i < 233; i+= 15) {
+//         draw_line(47, i, 273, i, WHITE);
+//     }
+// }
 
 void highlight_tile(int x, int y) {
 
@@ -262,6 +331,22 @@ void highlight_tile(int x, int y) {
     draw_line(x_coord+15, y_coord, x_coord+15, y_coord+15, RED); //right line
 }
 
+
+// -------------------------------------------------------------
+
+void video_text(int x, int y, char * text_ptr) {
+    int offset;
+    volatile char * character_buffer = (char *)FPGA_CHAR_BASE; // video character buffer
+    /* assume that the text string fits on one line */
+    offset = (y << 7) + x;
+    while (*(text_ptr)) {
+        *(character_buffer + offset) = *(text_ptr); // write to the character buffer
+        ++text_ptr;
+        ++offset;
+    }
+}
+
+// -------------------------------------------------------------
 
 void clear_screen() {
     for (int x = 0; x<320; x++) {
