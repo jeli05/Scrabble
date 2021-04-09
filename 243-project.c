@@ -120,6 +120,7 @@ void highlight_tile(int x, int y);
 void video_text(int x, int y, char * text_ptr);
 void color_tiles(int row, int col);
 
+
 volatile int pixel_buffer_start; // global variable
 const char *letters[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
 const char *values[] = {"1", "3", "3", "3", "1", "4", "2", "4", "1", "8", "5", "1", "3", "1", "1", "3", "9", "1", "1", "1", "1", "4", "4", "8", "4", "9"};
@@ -340,7 +341,6 @@ void draw_rack() {
     }
 }
 
-<<<<<<< HEAD
 void color_tiles(int row, int col) {
     if (row == 0 ||  row == 14) {
         if (col == 0 || col == 7 || col == 14) {
@@ -417,8 +417,6 @@ void color_square(int x, int y, short int color) {
 //     }
 // }
 
-=======
->>>>>>> 3bbbaa75984972270b0fd93a71da87aaed78bf41
 void highlight_tile(int x, int y) {
 
     int x_coord = 68 + 12*x;
@@ -442,16 +440,6 @@ void video_text(int x, int y, char * text_ptr) {
     }
 }
 
-<<<<<<< HEAD
-// -------------------------------------------------------------
-
-
-
-
-
-
-=======
->>>>>>> 3bbbaa75984972270b0fd93a71da87aaed78bf41
 void clear_screen() {
     for (int x = 0; x<320; x++) {
         for (int y = 0; y < 240; y++) {
