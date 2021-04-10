@@ -313,7 +313,7 @@ int main(void) {
         if (RVALID) {
              pattern = SW_data & 0xFFFF;
 		
-            //LEFT ARROW
+            //switches???
             if (pattern & 0x00000001) {
                clear_screen();
             }
@@ -383,7 +383,7 @@ void color_tiles(int row, int col) {
         color_square(row, col, CYAN);
     }
 
-    if ((row == 1 || row == 14) && (col == 5 || col == 9)) {
+    if ((row == 1 || row == 13) && (col == 5 || col == 9)) {
         color_square(row, col, BLUE);
     }
 
