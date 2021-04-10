@@ -135,9 +135,9 @@ int main(void) {
     pixel_buffer_start = *pixel_ctrl_ptr;
 
     volatile int *PS2_ptr = (int*)0xFF200100;
-
+    volatile int *KEY_ptr = (int*) KEY_BASE;
     volatile int *SW_ptr = (int *)0xFF200040;
-    int PS2_data, SW_data, RVALID;
+    int PS2_data, SW_data, KEY_data, RVALID;
     char input = 0;
 	char input2 = 0;
     char pattern = 0;
