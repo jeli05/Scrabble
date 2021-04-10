@@ -131,6 +131,7 @@ void color_tiles(int row, int col);
 volatile int pixel_buffer_start; // global variable
 const char *letters[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
 const char *values[] = {"1", "3", "3", "3", "1", "4", "2", "4", "1", "8", "5", "1", "3", "1", "1", "3", "9", "1", "1", "1", "1", "4", "4", "8", "4", "9"};
+// Q and Z may need to be given values of 9 instead of 10, or we can use X to represent 10
 // const char *values[] = {1, 3, 3, 3, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3, 9, 1, 1, 1, 1, 4, 4, 8, 4, 9};
 // int frequency[26] = {9, 2, 2, 4, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1};
 
@@ -266,26 +267,71 @@ int main(void) {
         // }
     }
 
-    // following two for loops are temporary
-    int letter = 0;
-    for (int i = 18; i < 61; i += 3) {
-        for (int j = 6; j < 49; j+= 3) {
-            // video_text(i, j, letters[letter]); // temporary
-            letter++;
-            if (letter == 26)
-                letter = 0;
-            // video_text(i, j, " "); // to clear whole board
+    int bonusLetterSquares[15][15];
+    int bonusWordSquares[15][15];
+
+    // set values for bonus letter squares
+    for (int i = 0; i < 15; i++) {
+        for (int j = 0; j < 15; j++) {
+            bonusLetterSquares[i][j] = 1;
+            if (i == 0 && (j == 3 || j == 11))
+                bonusLetterSquares[i][j] = 2;
+            else if (i == 1 && (j == 5 || j == 9))
+                bonusLetterSquares[i][j] = 3;
+            else if (i == 2 && (j == 6 || j == 8))
+                bonusLetterSquares[i][j] = 2;
+            else if (i == 3 && (j == 0 || j == 7 || j == 14))
+                bonusLetterSquares[i][j] = 2;
+            else if (i == 5 && (j == 1 || j == 5 || j == 9 || j == 13))
+                bonusLetterSquares[i][j] = 3;
+            else if (i == 6 && (j == 2 || j == 6 || j == 8 || j == 12))
+                bonusLetterSquares[i][j] = 2;
+            else if (i == 7 && (j == 3 || j == 11))
+                bonusLetterSquares[i][j] = 2;
+            else if (i > 7)
+                bonusLetterSquares[i][j] = bonusLetterSquares[14-i][j];
         }
     }
-    int value = 0;
-    for (int i = 19; i < 62; i += 3) {
-        for (int j = 7; j < 50; j+= 3) {
-            // video_text(i, j, values[value]); // temporary
-            value++;
-            if (value == 26)
-                value = 0;
-            // video_text(i, j, " "); // to clear whole board
-        } // Q and Z may need to be given values of 9 instead of 10, or we can use X to represent 10
+
+    // set values for bonus word squares
+    for (int i = 0; i < 15; i++) {
+        for (int j = 0; j < 15; j++) {
+            bonusWordSquares[i][j] = 1;
+            if (i == 0 && (j == 0 || j == 7 || j == 14))
+                bonusWordSquares[i][j] = 3;
+            else if (i == 1 && (j == 1 || j == 13))
+                bonusWordSquares[i][j] = 2;
+            else if (i == 2 && (j == 2 || j == 12))
+                bonusWordSquares[i][j] = 2;
+            else if (i == 3 && (j == 3 || j == 11))
+                bonusWordSquares[i][j] = 2;
+            else if (i == 4 && (j == 4 || j == 10))
+                bonusWordSquares[i][j] = 2;
+            else if (i == 7) {
+                if (j == 0 || j == 14)
+                    bonusWordSquares[i][j] = 3;
+                else if (j == 7)
+                    bonusWordSquares[i][j] = 2;
+            }
+            else if (i > 7)
+                bonusWordSquares[i][j] = bonusWordSquares[14-i][j];
+        }
+    }
+
+    for (int i = TOP; i <= BOTTOM; i += 3) {
+        for (int j = LEFT; j <= RIGHT; j += 3) {
+            char temp[3];
+            // sprintf(temp, "%d", bonusLetterSquares[(i-TOP)/3][(j-LEFT)/3]);
+            sprintf(temp, "%d", bonusWordSquares[(i-TOP)/3][(j-LEFT)/3]);
+            video_text(j, i, temp);
+            video_text(j, i, " "); // to clear whole board
+        }
+    }
+
+    for (int i = TOP+1; i <= BOTTOM+1; i += 3) {
+        for (int j = LEFT+1; j <= RIGHT+1; j += 3) {
+            video_text(j, i, " "); // to clear whole board
+        }
     }
 
     highlight_tile(x, y);
