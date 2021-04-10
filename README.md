@@ -1,4 +1,4 @@
 # ECE-243-Project-Scrabble
 
 ## Current State
-![image](https://user-images.githubusercontent.com/61927002/114256132-d1c81300-996c-11eb-991f-9d249c4614e3.png)
+![image](https://user-images.githubusercontent.com/61927002/114256390-ce815700-996d-11eb-81a3-3a255da8b299.png)
