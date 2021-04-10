@@ -107,6 +107,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <time.h>
+#include <string.h>
 
 // Begin part3.c code for Lab 7
 void wait_for_vsync();
@@ -123,8 +124,10 @@ void color_tiles(int row, int col);
 
 volatile int pixel_buffer_start; // global variable
 const char *letters[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+// char *lettersArray1[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
 const char *values[] = {"1", "3", "3", "3", "1", "4", "2", "4", "1", "8", "5", "1", "3", "1", "1", "3", "9", "1", "1", "1", "1", "4", "4", "8", "4", "9"};
 // const char *values[] = {1, 3, 3, 3, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3, 9, 1, 1, 1, 1, 4, 4, 8, 4, 9};
+int frequency[26] = {9, 2, 2, 4, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1};
 
 int main(void) {
     volatile int * pixel_ctrl_ptr = (int *)0xFF203020;
@@ -177,11 +180,99 @@ int main(void) {
     // video_text(66, 52, "             ");
 
     video_text(29, 52, "THESE ARE YOUR TILES:");
-    for (int i = 30; i < 30 + 3*7; i += 3) { // randomly generated tiles
-        int num = rand() % 26;
-		video_text(i, 55, letters[num]);
-        video_text(i+1, 56, values[num]);
-	}
+    // for (int i = 30; i < 30 + 3*7; i += 3) { // randomly generated tiles
+    //     int num = rand() % 26;
+	// 	video_text(i, 55, letters[num]);
+    //     video_text(i+1, 56, values[num]);
+	// }
+
+    // ------------------------------------------------------- VARIABLES METHOD BELOW
+    int letterCount[26] = {9, 2, 2, 4, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1};
+
+    int arraySize = 98;
+    char *tileBag[arraySize];
+    int counter = 0;
+    for (int i = 0; i < 26; i++) {
+        for (int j = 0; j < letterCount[i]; j++) {
+            tileBag[counter] = letters[i];
+            counter++;
+        }
+    }
+
+    // for (int i = 0; i < 80; i++) {
+    //     video_text(i, 51, tileBag[i]);
+    // }
+
+    char* rack1[8];
+    int bagSize = 0;
+    // char* rack2[8];
+    for (int i = 0; i < 7; i++) { // 7 tiles each at the beginning
+    	if (i == 0) {
+            for (int j = 0; j < 26; j++) {
+                bagSize += letterCount[j];
+                // char temp[3];
+                // sprintf(temp, "%d", letterCount[j]);
+                // video_text(1, 10+j, temp);
+            }
+            // char temp[3];
+            // sprintf(temp, "%d", bagSize);
+            // video_text(1, 38, temp);
+		}
+
+        // create the array for the tile bag
+        char *bag[bagSize];
+        int subcounter = 0;
+        for (int a = 0; a < 26; a++) {
+            for (int b = 0; b < letterCount[a]; b++) {
+                bag[subcounter] = letters[a];
+                subcounter++;
+            }
+        }
+
+        // for (int j = 0; j < 80; j++) {
+        //     video_text(j, 53+i, bag[j]);
+        // }
+
+        // pick random tile from bag
+        int position = rand() % bagSize;
+        
+        // show taken out tile on rack
+        rack1[i] = bag[position];
+		video_text(30+3*i, 55, rack1[i]);
+
+        // char temp[3];
+        // sprintf(temp, "%d", bagSize);
+        // video_text(1, 40+i, temp);
+
+        // update letter count to reflect tile taken out
+        for (int j = 0; j < 26; j++) {
+            if (bag[position] == letters[j]) {
+                if (letterCount[j] == 0)
+                    video_text(1, 6, "FUCK");
+                letterCount[j] -= 1;
+        		video_text(31+3*i, 56, values[j]);
+
+                // char displayValue[2];
+                // sprintf(displayValue, "%d", values[j]);
+        		// video_text(31+3*i, 56, displayValue);
+                break;
+            }
+        }
+
+        // modify array to account for tile taken out
+        for (int c = 0; c < position - 1; c++)
+            bag[c] = bag[c];
+        for (int c = position - 1; c < bagSize - 1; c++)
+            bag[c] = bag[c+1];
+        bagSize--;
+
+        // for (int k = 0; k < 26; k++) {
+        //     char temp1[3];
+        //     sprintf(temp1, "%d", letterCount[k]);
+        //     video_text(3+2*i, 10+k, temp1);
+        // }
+    }
+    // ------------------------------------------------------- VARIABLES METHOD ABOVE
 
     int letter = 0;
     for (int i = 18; i < 61; i += 3) {
