@@ -431,7 +431,7 @@ void color_tiles(int row, int col) {
             color_square(row, col, MAGENTA);
         }
     }
-    if (row == 8 && (col == 0 || col == 14)) {
+    if (row == 7 && (col == 0 || col == 14)) {
         color_square(row, col, MAGENTA);
     }
 
