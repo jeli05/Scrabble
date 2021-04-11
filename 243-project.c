@@ -200,6 +200,14 @@ int main(void) {
     char* rack2[8];
     char* rack1Values[8];
     char* rack2Values[8];
+
+     char* inPlay[8];
+     char* inPlayValues[8];
+
+     for (int i = 0; i < 8; i++) {
+          inPlay[i] = " ";
+          inPlayValues[i] = " ";
+     }
     
     for (int i = 0; i < 14; i++) { // assign 7 random tiles each at the beginning
         // create the array for the tile bag
@@ -294,6 +302,14 @@ int main(void) {
     int bonusWordSquares[15][15];
     int board[15][15];
     int tempBoard[15][15];
+
+    int boardThisTurn[15][15];
+
+   for (int i = 0; i < 15; i++) {
+        for (int j = 0; j < 15; j++) {
+            boardThisTurn[i][j] = 0;
+        }
+    }
 
     // set values for bonus letter squares
     for (int i = 0; i < 15; i++) {
@@ -493,8 +509,7 @@ int main(void) {
             //////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////
         */
-            char* inPlay[8];
-            char* inPlayValues[8];
+           
             
             int index = -1;
               if (input2 == (char)0x16) {
@@ -634,21 +649,21 @@ int main(void) {
                                         //Draws on the board
                                         video_text(selected_tile[0]*3 + LEFT, selected_tile[1]*3 + TOP,  " ");
                                         video_text(selected_tile[0]*3 + LEFT+1, selected_tile[1]*3 + TOP+1, " ");
-                                        //board[selected_tile[0]][selected_tile[1]] = atoi(rack1Values[index]); // put value of tile on rack
+                                        
+                                        
                                         //Draws on the rack
                                         //for (int i = 0; i < )
-                                        //board is an int array that holds the index of the placed tile. so to put it back on the rack
+                                        //boardThisTurn is an int array that holds the index of the placed tile. so to put it back on the rack
                                         //place the letter at the selected tile back to the index in board. 
-                                        int rack_index = board[selected_tile[0]][selected_tile[1]];
-                                        //rack1[rack_index] = ;
-                                       // rack1[rack_index] = "A";
-                                        //board[selected_tile[0]][selected_tile[1]] = 0;
+                                        int rack_index = boardThisTurn[selected_tile[0]][selected_tile[1]];
+
                                         rack1[rack_index] = inPlay[rack_index];
-                                       // rack1Values[rack_index] = inPlayValues[rack_index];
+                                        rack1Values[rack_index] = inPlayValues[rack_index];
+                                       
                                         inPlay[rack_index] = 0;
                                         for (int i = 0; i < 7; i++) { // display rack tiles after each tile placing
                                             video_text(30+3*i, 55, rack1[i]);
-                                          //  video_text(31+3*i, 56, rack1Values[i]);
+                                            video_text(31+3*i, 56, rack1Values[i]);
                                         }
                                     }
                                }
@@ -658,11 +673,22 @@ int main(void) {
                                         //Draws on the board
                                         video_text(selected_tile[0]*3 + LEFT, selected_tile[1]*3 + TOP,  " ");
                                         video_text(selected_tile[0]*3 + LEFT+1, selected_tile[1]*3 + TOP+1, " ");
+                                        
+                                        
                                         //Draws on the rack
+                                        //for (int i = 0; i < )
+                                        //boardThisTurn is an int array that holds the index of the placed tile. so to put it back on the rack
+                                        //place the letter at the selected tile back to the index in board. 
+                                        int rack_index = boardThisTurn[selected_tile[0]][selected_tile[1]];
 
-                                        rack2Values[index] = inPlayValues[index];
-                                        inPlay[index] = 0;
-
+                                        rack2[rack_index] = inPlay[rack_index];
+                                        rack2Values[rack_index] = inPlayValues[rack_index];
+                                       
+                                        inPlay[rack_index] = 0;
+                                        for (int i = 0; i < 7; i++) { // display rack tiles after each tile placing
+                                            video_text(30+3*i, 55, rack2[i]);
+                                            video_text(31+3*i, 56, rack2Values[i]);
+                                        }
                                         
                                     }
                                }
@@ -701,6 +727,9 @@ int main(void) {
                         sprintf(displayScore1, "%d", tempScore1);
                         video_text(8, 4, displayScore1); // to be updated after each turn
                         inPlay[index] = rack1[index];
+
+                        boardThisTurn[selected_tile[0]][selected_tile[1]] = index;
+                    
                         rack1[index] = " ";
                         inPlayValues[index] = rack1Values[index];
                         rack1Values[index] = " ";
@@ -758,6 +787,11 @@ int main(void) {
                                 selected_tile[0] = 7;
                                 selected_tile[1] = 7;
                                 //video_text(0, 14, "switched players");
+                                for (int i = 0; i < 15; i++) {
+                                    for (int j = 0; j < 15; j++) {
+                                        boardThisTurn[i][j] = 0;
+                                    }
+                                }
 
                                 // show/hide player turn message
                                 if (player1Turn) {
