@@ -127,6 +127,7 @@ void draw_rack();
 void highlight_tile(int x, int y);
 void video_text(int x, int y, char * text_ptr);
 void color_tiles(int row, int col);
+void checkTileSelected(int PS2_data, int selected_x, int selected_y, char input2);
 
 
 volatile int pixel_buffer_start; // global variable
@@ -135,6 +136,8 @@ const char *values[] = {"1", "3", "3", "3", "1", "4", "2", "4", "1", "8", "5", "
 // Q and Z may need to be given values of 9 instead of 10, or we can use X to represent 10
 // const char *values[] = {1, 3, 3, 3, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3, 9, 1, 1, 1, 1, 4, 4, 8, 4, 9};
 // int frequency[26] = {9, 2, 2, 4, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1};
+volatile int *PS2_ptr = (int*)0xFF200100;
+
 
 int main(void) {
     volatile int * pixel_ctrl_ptr = (int *)0xFF203020;
@@ -144,7 +147,7 @@ int main(void) {
     volatile int* LED_ptr= (int*) 0xFF200000;
     volatile int* HEX3_HEX0_ptr   = (int*) 0xFF200020;
 
-    volatile int *PS2_ptr = (int*)0xFF200100;
+    
     volatile int *KEY_ptr = (int*) KEY_BASE;
     volatile int *SW_ptr = (int *)0xFF200040;
     int PS2_data, SW_data, KEY_data, RVALID;
@@ -453,8 +456,163 @@ int main(void) {
                     }
                 }
             }
-         }
 
+
+
+         /*
+        //////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////
+        *   //////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////
+                CHECKING THE LETTERS
+            //////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////
+        */
+              if (input2 == (char)0x16) {
+                    while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF016) {
+                                //move select highlight to the left
+                               video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[0]);
+                               break;
+                            }
+                        }
+                    }
+              }
+
+              if (input2 == (char)0x1E) {
+                    while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF01E) {
+                                //move select highlight to the left
+                               video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[1]);
+                               break;
+                            }
+                        }
+                    }
+              }
+
+              if (input2 == (char)0x26) {
+                    while (1) {
+                        PS2_data = *(PS2_ptr);
+                        int RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF026) {
+                                //move select highlight to the left
+                               video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[2]);
+                               break;
+                            }
+                        }
+                    }
+                }
+
+                 if (input2 == (char)0x25) {
+                    while (1) {
+                        PS2_data = *(PS2_ptr);
+                        int RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF025) {
+                                //move select highlight to the left
+                               video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[3]);
+                               break;
+                            }
+                        }
+                    }
+            }
+
+               if (input2 == (char)0x2E) {
+                    while (1) {
+                        PS2_data = *(PS2_ptr);
+                        int RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF02E) {
+                                //move select highlight to the left
+                               video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[4]);
+                               break;
+                            }
+                        }
+                    }
+                }
+
+
+            if (input2 == (char)0x36) {
+                    while (1) {
+                        PS2_data = *(PS2_ptr);
+                        int RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF036) {
+                                //move select highlight to the left
+                               video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[5]);
+                               break;
+                            }
+                        }
+                    }
+            }
+
+            if (input2 == (char)0x3D) {
+                    while (1) {
+                        PS2_data = *(PS2_ptr);
+                        int RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF03D) {
+                                //move select highlight to the left
+                               video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[6]);
+                               break;
+                        }
+                    }
+                }
+            }
+
+         }
+   /*
+        //////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////
+        *   //////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////
+                DONE CHECKING THE LETTERS
+            //////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////
+        */
 
         //SW_data = *(SW_ptr);
         //RVALID = SW_data & 0x8000;
@@ -463,7 +621,7 @@ int main(void) {
         //{
             HEX_bits = SW_data;// set pattern using SW values
 
-            if (SW_data == 1 || SW_data == 2 || SW_data == 4 ||
+           /* if (SW_data == 1 || SW_data == 2 || SW_data == 4 ||
 			   SW_data == 8 || SW_data == 16 || SW_data == 32 || SW_data ==64) {
                 int tile = (log(SW_data)/log(2));
                  video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[tile]);
@@ -471,38 +629,7 @@ int main(void) {
            }
            else {
                video_text(1, 10, "whyyy");
-           }
-           /* else if (SW_data = 1) {
-                 video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[SW_data]);
-                 video_text(1, 8, "another test 1");
-            }
-            else if (SW_data = 2) {
-                 video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[SW_data]);
-                 video_text(1, 8, "another test 2");
-            }
-            else if (SW_data = 3) {
-                 video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[SW_data]);
-                 video_text(1, 8, "another test 3");
-            }
-            else if (SW_data = 4) {
-                 video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[SW_data]);
-                 video_text(1, 8, "another test 4");
-            }
-            else if (SW_data = 5) {
-                 video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[SW_data]);
-                 video_text(1, 8, "another test 5");
-            }
-            else if (SW_data = 6) {
-                 video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[SW_data]);
-                 video_text(1, 8, "another test 6");
-            }
-            else if (SW_data = 7) {
-                 video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[SW_data]);
-                 video_text(1, 8, "another test 7");
-            }*/
-           // else if (HEX_bits = 2) {
-                //video_text(1, 8, "another test");
-           // }
+           }*/
            
            // while(*KEY_ptr != 0);// wait for pushbutton KEY release
 
@@ -510,22 +637,44 @@ int main(void) {
             //rack1[SW_data]; is the letter
             //video_text(1, 6, rack1[SW_data]);
             
-        if(*KEY_ptr != 0)// check if any KEY was pressed
+        /*if(*KEY_ptr == 1)// check if any KEY was pressed
         {
             video_text(1, 8, "another test");
+            // while(*KEY_ptr != 0);// wait for pushbutton KEY release
         }
-        //*(HEX3_HEX0_ptr) = HEX_bits;
+        if(*KEY_ptr == 2)// check if any KEY was pressed
+        {
+            video_text(1, 8, "aaaaaaa");
+             while(*KEY_ptr != 0);// wait for pushbutton KEY release
+        }
+        if(*KEY_ptr == 3)// check if any KEY was pressed
+        {
+            video_text(1, 8, "bbbbbbb");
+             while(*KEY_ptr != 0);// wait for pushbutton KEY release
+        }
+        if(*KEY_ptr == 12 && gameOver == 2)// check if a player presses the PASS key 
+        {
+            video_text(1, 9, "You have chosen to pass. Next player's turn");
+            gameOver--;
+             //while(*KEY_ptr != 0);// wait for pushbutton KEY release
+        }
+        if(*KEY_ptr == 12 && gameOver == 1)// check if a player presses the PASS key 
+        {
+            video_text(1, 9, "You have passed for the second time in a row. ");
+            gameOver--;
+             //while(*KEY_ptr != 0);// wait for pushbutton KEY release
+        }*/
+
 
         //if (RVALID) {
-             pattern = SW_data & 0xFFFF;
-		
-            //switches???
-           //if (pattern & 0x00000001) {
-           //    clear_screen();
-           // }
+            
         //}
     }
 }
+
+ //void checkTileSelected(int PS2_data, int selected_x, int selected_y, char input2, char* letter) {
+
+ //}
 
 void draw_board() {
     for (int i = 68; i < 249; i+= 12) {
