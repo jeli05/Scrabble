@@ -139,6 +139,9 @@ int main(void) {
     /* Read location of the pixel buffer from the pixel buffer controller */
     pixel_buffer_start = *pixel_ctrl_ptr;
 
+    volatile int* LED_ptr= (int*) 0xFF200000;
+    volatile int* HEX3_HEX0_ptr   = (int*) 0xFF200020;
+
     volatile int *PS2_ptr = (int*)0xFF200100;
     volatile int *KEY_ptr = (int*) KEY_BASE;
     volatile int *SW_ptr = (int *)0xFF200040;
@@ -147,7 +150,9 @@ int main(void) {
 	char input2 = 0;
     char pattern = 0;
 
+    int HEX_bits = 0x0000000F;
 
+    int selected_tile[2] = {7,7};
     int x, y;
     x = 7;
     y = 7;
@@ -294,6 +299,10 @@ int main(void) {
 		PS2_data = *(PS2_ptr);
         RVALID = PS2_data & 0x8000;
 
+        SW_data = *(SW_ptr);// read the SW slider switch values
+        *(LED_ptr) = SW_data;// light up the red LEDs
+
+
          if (RVALID) {
             input2 = PS2_data & 0xFFFF;
 		
@@ -314,6 +323,8 @@ int main(void) {
 								x--;
 							}
                             highlight_tile(x, y);
+                            selected_tile[0] = x;
+                            selected_tile[1] = y;
                              break;
                         }
                     }
@@ -337,6 +348,8 @@ int main(void) {
 								    x++;
 							    }
                             highlight_tile(x, y);
+                            selected_tile[0] = x;
+                            selected_tile[1] = y;
                             break;
                         }
                     }
@@ -360,6 +373,8 @@ int main(void) {
 								y--;
 							}
                             highlight_tile(x, y);
+                            selected_tile[0] = x;
+                            selected_tile[1] = y;
                              break;
                         }
                     }
@@ -383,6 +398,8 @@ int main(void) {
 								y++;
 							}
                             highlight_tile(x, y);
+                            selected_tile[0] = x;
+                            selected_tile[1] = y;
                             break;
                         }
                     }
@@ -391,17 +408,40 @@ int main(void) {
          }
 
 
-        SW_data = *(SW_ptr);
-        RVALID = SW_data & 0x8000;
+        //SW_data = *(SW_ptr);
+        //RVALID = SW_data & 0x8000;
 
-        if (RVALID) {
+        //if(*KEY_ptr != 0)// check if any KEY was pressed
+        //{
+            HEX_bits = SW_data;// set pattern using SW values
+
+            if (SW_data = 2) {
+                 video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[SW_data]);
+            }
+            else if (HEX_bits = 2) {
+                //video_text(1, 8, "another test");
+            }
+           
+           // while(*KEY_ptr != 0);// wait for pushbutton KEY release
+
+            //draw the character from the row on the selected square
+            //rack1[SW_data]; is the letter
+            //video_text(1, 6, rack1[SW_data]);
+            
+        if(*KEY_ptr != 0)// check if any KEY was pressed
+        {
+            video_text(1, 8, "another test");
+        }
+        //*(HEX3_HEX0_ptr) = HEX_bits;
+
+        //if (RVALID) {
              pattern = SW_data & 0xFFFF;
 		
             //switches???
-            if (pattern & 0x00000001) {
-               clear_screen();
-            }
-        }
+           //if (pattern & 0x00000001) {
+           //    clear_screen();
+           // }
+        //}
     }
 }
 
