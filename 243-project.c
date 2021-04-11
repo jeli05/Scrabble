@@ -280,26 +280,28 @@ int main(void) {
     //     }
     // }
 
-    video_text(1, 15, "PLAYER 1 TILES");
-    video_text(1, 19, "PLAYER 2 TILES");
+    // video_text(1, 15, "PLAYER 1 TILES");
+    // video_text(1, 19, "PLAYER 2 TILES");
 
-    for (int i = 0; i < 7; i++) { // OK WTF
-        video_text(1+i, 16, rack1[i]);
-        video_text(1+i, 17, rack1Values[i]);
-        video_text(1+i, 20, rack2[i]);
-        video_text(1+i, 21, rack2Values[i]);
-    }
+    // for (int i = 0; i < 7; i++) { // OK WTF
+    //     video_text(1+i, 16, rack1[i]);
+    //     video_text(1+i, 17, rack1Values[i]);
+    //     video_text(1+i, 20, rack2[i]);
+    //     video_text(1+i, 21, rack2Values[i]);
+    // }
 
     int bonusLetterSquares[15][15];
     int bonusWordSquares[15][15];
     int board[15][15];
     int tempBoard[15][15];
+    int wordBoard[15][15];
 
     // set values for bonus letter squares
     for (int i = 0; i < 15; i++) {
         for (int j = 0; j < 15; j++) {
             board[i][j] = 0;
             tempBoard[i][j] = 0;
+            wordBoard[i][j] = 0;
             bonusLetterSquares[i][j] = 1;
             if (i == 0 && (j == 3 || j == 11))
                 bonusLetterSquares[i][j] = 2;
@@ -675,13 +677,15 @@ int main(void) {
         */
 
             if (index >= 0) { // display played tiles on board
+                int xcoord = selected_tile[0];
+                int ycoord = selected_tile[1];
                 if (player1Turn) {
-                    if (board[selected_tile[0]][selected_tile[1]] == 0) {
-                        video_text(selected_tile[0]*3 + LEFT, selected_tile[1]*3 + TOP, rack1[index]);
-                        video_text(selected_tile[0]*3 + LEFT+1, selected_tile[1]*3 + TOP+1, rack1Values[index]);
-                        board[selected_tile[0]][selected_tile[1]] = atoi(rack1Values[index]); // put value of tile on board
-                        // tempBoard[selected_tile[0]][selected_tile[1]] = atoi(rack1Values[index]);
-                        tempScore1 += bonusLetterSquares[selected_tile[0]][selected_tile[1]]*atoi(rack1Values[index]);
+                    if (board[ycoord][xcoord] == 0 && tempBoard[ycoord][xcoord] == 0) {
+                        video_text(xcoord*3 + LEFT, ycoord*3 + TOP, rack1[index]); // switched xcoord and ycoord
+                        video_text(xcoord*3 + LEFT+1, ycoord*3 + TOP+1, rack1Values[index]); // switched xcoord and ycoord
+                        // board[ycoord][xcoord] = atoi(rack1Values[index]); // put value of tile on board
+                        tempBoard[ycoord][xcoord] = atoi(rack1Values[index]);
+                        tempScore1 += bonusLetterSquares[ycoord][xcoord]*atoi(rack1Values[index]);
                         char displayScore1[4];
                         sprintf(displayScore1, "%d", tempScore1);
                         video_text(8, 4, displayScore1); // to be updated after each turn
@@ -689,16 +693,16 @@ int main(void) {
                         rack1[index] = " ";
                         inPlayValues[index] = rack1Values[index];
                         rack1Values[index] = " ";
-                        if (bonusWordSquares[selected_tile[0]][selected_tile[1]] != 1)
-                            multiplier *= bonusWordSquares[selected_tile[0]][selected_tile[1]];
+                        if (bonusWordSquares[ycoord][xcoord] != 1)
+                            multiplier *= bonusWordSquares[ycoord][xcoord];
                     }
                 } else {
-                    if (board[selected_tile[0]][selected_tile[1]] == 0) {
-                        video_text(selected_tile[0]*3 + LEFT, selected_tile[1]*3 + TOP, rack2[index]);
-                        video_text(selected_tile[0]*3 + LEFT+1, selected_tile[1]*3 + TOP+1, rack2Values[index]);
-                        board[selected_tile[0]][selected_tile[1]] = atoi(rack2Values[index]); // put value of tile on board
-                        // tempBoard[selected_tile[0]][selected_tile[1]] = atoi(rack2Values[index]);
-                        tempScore2 += bonusLetterSquares[selected_tile[0]][selected_tile[1]]*atoi(rack2Values[index]);
+                    if (board[ycoord][xcoord] == 0 && tempBoard[ycoord][xcoord] == 0) {
+                        video_text(xcoord*3 + LEFT, ycoord*3 + TOP, rack2[index]); // switched xcoord and ycoord
+                        video_text(xcoord*3 + LEFT+1, ycoord*3 + TOP+1, rack2Values[index]); // switched xcoord and ycoord
+                        // board[ycoord][xcoord] = atoi(rack2Values[index]); // put value of tile on board
+                        tempBoard[ycoord][xcoord] = atoi(rack2Values[index]);
+                        tempScore2 += bonusLetterSquares[ycoord][xcoord]*atoi(rack2Values[index]);
                         char displayScore2[4];
                         sprintf(displayScore2, "%d", tempScore2);
                         video_text(73, 4, displayScore2); // to be updated after each turn
@@ -706,8 +710,8 @@ int main(void) {
                         rack2[index] = " ";
                         inPlayValues[index] = rack2Values[index];
                         rack2Values[index] = " ";
-                        if (bonusWordSquares[selected_tile[0]][selected_tile[1]] != 1)
-                            multiplier *= bonusWordSquares[selected_tile[0]][selected_tile[1]];
+                        if (bonusWordSquares[ycoord][xcoord] != 1)
+                            multiplier *= bonusWordSquares[ycoord][xcoord];
                     }
                 }
             }
@@ -743,6 +747,66 @@ int main(void) {
                                 selected_tile[0] = 7;
                                 selected_tile[1] = 7;
                                 video_text(0, 14, "switched players");
+
+                                for (int i = 0; i < 15; i++) {
+                                    for (int j = 0; j < 15; j++) {
+                                        if (tempBoard[i][j] == 0) continue;
+                                        // int right = i+1;
+                                        int rightLoop = 1;
+                                        if (i+1 >= 15) rightLoop = 0;
+                                        int advance = 0;
+                                        while (board[i+1+advance][j] != 0 && rightLoop) {
+                                            wordBoard[i+1+advance][j] = board[i+1+advance][j];
+                                            advance++;
+                                            if (i+1+advance >= 15) break;
+                                        }
+                                        int leftLoop = 1;
+                                        if (i-1 < 0) leftLoop = 0;
+                                        advance = 0;
+                                        while (board[i-1-advance][j] != 0 && leftLoop) {
+                                            wordBoard[i-1-advance][j] = board[i-1-advance][j];
+                                            advance++;
+                                            if (i-1-advance < 0) break;
+                                        }
+                                        int downLoop = 1;
+                                        if (j+1 >= 15) downLoop = 0;
+                                        advance = 0;
+                                        while (board[i][j+1+advance] != 0 && downLoop) {
+                                            wordBoard[i][j+1+advance] = board[i][j+1+advance];
+                                            advance++;
+                                            if (j+1+advance >= 15) break;
+                                        }
+                                        int upLoop = 1;
+                                        if (j-1 < 0) upLoop = 0;
+                                        advance = 0;
+                                        while (board[i][j-1-advance] != 0 && upLoop) {
+                                            wordBoard[i][j-1-advance] = board[i][j-1-advance];
+                                            advance++;
+                                            if (j-1-advance < 0) break;
+                                        }
+                                    }
+                                }
+
+                                for (int i = 0; i < 15; i++) {
+                                    for (int j = 0; j < 15; j++) {
+                                        board[i][j] += tempBoard[i][j];
+                                        char* temp[3];
+                                        sprintf(temp, "%d", board[i][j]);
+                                        video_text(0+j, 5+i, temp);
+                                        char* tempB[3];
+                                        sprintf(tempB, "%d", tempBoard[i][j]);
+                                        video_text(0+j, 21+i, tempB);
+                                        char* display[3];
+                                        sprintf(display, "%d", wordBoard[i][j]);
+                                        video_text(0+j, 37+i, display);
+                                        if (player1Turn)
+                                            tempScore2 += wordBoard[i][j];
+                                        else if (!player1Turn)
+                                            tempScore1 += wordBoard[i][j];
+                                        tempBoard[i][j] = 0;
+                                        wordBoard[i][j] = 0;
+                                    }
+                                }
 
                                 // show/hide player turn message
                                 if (player1Turn) {
@@ -814,7 +878,7 @@ int main(void) {
                                                     if (letterCount[j] == 0)
                                                         video_text(1, 6, "FUCK");
                                                     letterCount[j] -= 1;
-                                                    rack1Values[i] = values[j];
+                                                    rack2Values[i] = values[j];
                                                     break;
                                                 }
                                             }
