@@ -984,8 +984,6 @@ int main(void) {
                                 if (player1Turn) {
                                     video_text(1, 52, "PLAYER 1 TURN");
                                     video_text(66, 52, "             ");
-                                    if (direction != 0)
-                                        repeatedScore2 = 0;
                                     char turnScore2[3];
                                     sprintf(turnScore2, "%d", multiplier*tempScore2 + multiScore2 + repeatedScore2);
                                     video_text(71, 8+turnNumber2, turnScore2);
@@ -1003,8 +1001,6 @@ int main(void) {
                                 else if (!player1Turn) {
                                     video_text(66, 52, "PLAYER 2 TURN");
                                     video_text(1, 52, "             ");
-                                    if (direction != 0)
-                                        repeatedScore1 = 0;
                                     char turnScore1[3];
                                     sprintf(turnScore1, "%d", multiplier*tempScore1 + multiScore1 + repeatedScore1);
                                     video_text(64, 8+turnNumber1, turnScore1);
