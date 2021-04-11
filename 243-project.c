@@ -161,6 +161,7 @@ int main(void) {
     x = 7;
     y = 7;
     int gameOver = 2;
+    int tilesPlacedThisTurn = 0;
     
 
     clear_screen();
@@ -664,6 +665,7 @@ int main(void) {
                                        
                                         inPlay[rack_index] = 0;
                                         tempBoard[selected_tile[1]][selected_tile[0]] = 0;
+                                        tilesPlacedThisTurn--;
 
                                         for (int i = 0; i < 7; i++) { // display rack tiles after each tile placing
                                             video_text(30+3*i, 55, rack1[i]);
@@ -690,6 +692,7 @@ int main(void) {
                                        
                                         inPlay[rack_index] = 0;
                                         tempBoard[selected_tile[1]][selected_tile[0]] = 0;
+                                        tilesPlacedThisTurn--;
 
                                         for (int i = 0; i < 7; i++) { // display rack tiles after each tile placing
                                             video_text(30+3*i, 55, rack2[i]);
@@ -737,6 +740,7 @@ int main(void) {
                         inPlay[index] = rack1[index];
 
                         boardThisTurn[selected_tile[0]][selected_tile[1]] = index;
+                        tilesPlacedThisTurn++;
                     
                         rack1[index] = " ";
                         inPlayValues[index] = rack1Values[index];
@@ -757,6 +761,7 @@ int main(void) {
                         inPlay[index] = rack2[index];
 
                         boardThisTurn[selected_tile[0]][selected_tile[1]] = index;
+                        tilesPlacedThisTurn++;
 
                         rack2[index] = " ";
                         inPlayValues[index] = rack2Values[index];
@@ -778,7 +783,9 @@ int main(void) {
                 }
             }
 
+            /////////////////////////////////////////////////
             //IF THE PLAYER PRESSES ENTER (TO END THEIR TURN)
+            /////////////////////////////////////////////////
             if (input2 == (char)0x5A) {
 
                     while (1) {
@@ -978,6 +985,18 @@ int main(void) {
                                     }
                                 }
 
+                                //char tempText[1] = " ";
+                                //sprintf(tempText, "%d", gameOver);
+                                //video_text(66, 30, tempText);
+
+                                if (tilesPlacedThisTurn == 0) {
+                                    gameOver--;
+                                }
+                                else {
+                                    gameOver = 2;
+                                    tilesPlacedThisTurn = 0;
+                                }
+
                                 break;
                             }
                         }
@@ -1009,6 +1028,9 @@ int main(void) {
 
 
     }
+
+    video_text(66, 28, "GAME OVER");
+
 }
 
 
