@@ -1030,6 +1030,15 @@ int main(void) {
     }
 
     video_text(66, 28, "GAME OVER");
+    if (score1 > score2) {
+        video_text(65, 30, "Player 1 wins!");
+    } 
+    else if (score1 < score2) {
+        video_text(65, 30, "Player 2 wins!");
+    }
+    else {
+        video_text(65, 30, "It's a tie!");
+    }
 
 }
 
