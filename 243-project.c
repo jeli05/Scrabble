@@ -157,11 +157,13 @@ int main(void) {
 
     int HEX_bits = 0x0000000F;
 
+    bool player1Turn = true; //true is player1, false is player2
     int selected_tile[2] = {7,7};
     int x, y;
     x = 7;
     y = 7;
     int gameOver = 2;
+    
 
     clear_screen();
 
@@ -483,7 +485,12 @@ int main(void) {
                             //if the key is released
                             if (input2 == (char)0xF016) {
                                 //move select highlight to the left
-                               video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[0]);
+                               //print tile
+                              if (player1Turn) {
+                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[0]);
+                                } else {
+                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[0]);
+                                }
                                break;
                             }
                         }
@@ -501,7 +508,12 @@ int main(void) {
                             //if the key is released
                             if (input2 == (char)0xF01E) {
                                 //move select highlight to the left
-                               video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[1]);
+                               //print tile
+                              if (player1Turn) {
+                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[1]);
+                                } else {
+                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[1]);
+                                }
                                break;
                             }
                         }
@@ -518,8 +530,12 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF026) {
-                                //move select highlight to the left
-                               video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[2]);
+                                //print tile
+                              if (player1Turn) {
+                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[2]);
+                                } else {
+                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[2]);
+                                }
                                break;
                             }
                         }
@@ -536,8 +552,12 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF025) {
-                                //move select highlight to the left
-                               video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[3]);
+                                //print tile
+                              if (player1Turn) {
+                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[3]);
+                                } else {
+                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[3]);
+                                }
                                break;
                             }
                         }
@@ -554,8 +574,12 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF02E) {
-                                //move select highlight to the left
-                               video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[4]);
+                                //print tile
+                              if (player1Turn) {
+                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[4]);
+                                } else {
+                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[4]);
+                                }
                                break;
                             }
                         }
@@ -573,8 +597,12 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF036) {
-                                //move select highlight to the left
-                               video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[5]);
+                                //print tile
+                              if (player1Turn) {
+                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[5]);
+                                } else {
+                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[5]);
+                                }
                                break;
                             }
                         }
@@ -592,15 +620,17 @@ int main(void) {
                             //if the key is released
                             if (input2 == (char)0xF03D) {
                                 //move select highlight to the left
-                               video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[6]);
+                                if (player1Turn) {
+                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[6]);
+                                } else {
+                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[6]);
+                                }
                                break;
                         }
                     }
                 }
             }
-
-         }
-   /*
+        /*
         //////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////
@@ -614,12 +644,41 @@ int main(void) {
             //////////////////////////////////////////////////////////////////
         */
 
+            //IF THE PLAYER PRESSES ENTER (TO END THEIR TURN)
+            if (input2 == (char)0x5A) {
+                    while (1) {
+                        PS2_data = *(PS2_ptr);
+                        int RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF05A) {
+                                
+                               //Switch the player turns
+                               player1Turn = !player1Turn;
+                               draw_board();
+                               highlight_tile(7, 7);
+                               selected_tile[0] = 7;
+                               selected_tile[1] = 7;
+                               video_text(0, 14, "switched players");
+                               
+                               break;
+                        }
+                    }
+                }
+            }
+
+        }
+  
+
         //SW_data = *(SW_ptr);
         //RVALID = SW_data & 0x8000;
 
         //if(*KEY_ptr != 0)// check if any KEY was pressed
         //{
-            HEX_bits = SW_data;// set pattern using SW values
+           // HEX_bits = SW_data;// set pattern using SW values
 
            /* if (SW_data == 1 || SW_data == 2 || SW_data == 4 ||
 			   SW_data == 8 || SW_data == 16 || SW_data == 32 || SW_data ==64) {
