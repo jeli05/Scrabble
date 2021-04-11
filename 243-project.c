@@ -1,7 +1,5 @@
 /* This files provides address values that exist in the system */
 
-/* This files provides address values that exist in the system */
-
 #define BOARD                 "DE1-SoC"
 
 /* Memory */
@@ -185,22 +183,11 @@ int main(void) {
 
     video_text(1, 1, "PLAYER 1");
     video_text(1, 3, "SCORE: ");
-    char displayScore1[4];
-    sprintf(displayScore1, "%d", score1);
-    video_text(8, 3, displayScore1); // to be updated after each turn
+    video_text(8, 3, "0");
 
     video_text(66, 1, "PLAYER 2");
     video_text(66, 3, "SCORE: ");
-    char displayScore2[4];
-    sprintf(displayScore2, "%d", score2);
-    video_text(73, 3, displayScore2); // to be updated after each turn
-
-    // show/hide player turn message
-    video_text(1, 52, "PLAYER 1 TURN");
-    // video_text(1, 52, "             ");
-
-    video_text(66, 52, "PLAYER 2 TURN");
-    // video_text(66, 52, "             ");
+    video_text(73, 3, "0"); // to be updated after each turn
 
     video_text(29, 52, "THESE ARE YOUR TILES:");
     video_text(29, 58, "TILES LEFT IN BAG:");
@@ -211,6 +198,8 @@ int main(void) {
     // hold each player's tiles on rack
     char* rack1[8];
     char* rack2[8];
+    char* rack1Values[8];
+    char* rack2Values[8];
     
     for (int i = 0; i < 14; i++) { // assign 7 random tiles each at the beginning
         // create the array for the tile bag
@@ -235,8 +224,8 @@ int main(void) {
             rack1[i] = bag[position];
             video_text(30+3*i, 55, rack1[i]);
         }
-        if (i > 7) {
-            rack2[i] = bag[position];
+        if (i >= 7) {
+            rack2[i-7] = bag[position];
             // video_text(30+3*i, 55, rack2[i]);
         }
 
@@ -250,8 +239,14 @@ int main(void) {
                 if (letterCount[j] == 0)
                     video_text(1, 6, "FUCK");
                 letterCount[j] -= 1;
-                if (i < 7)
-        		    video_text(31+3*i, 56, values[j]);
+                if (i < 7) {
+                    rack1Values[i] = values[j];
+                    video_text(31+3*i, 56, values[j]);
+                }
+                if (i >= 7) {
+                    rack2Values[i-7] = values[j];
+                    // video_text(31+3*i, 56, values[j]);
+                }
 
                 // char displayValue[2];
                 // sprintf(displayValue, "%d", values[j]);
@@ -260,11 +255,6 @@ int main(void) {
             }
         }
 
-        // modify array to account for tile taken out
-        for (int c = 0; c < position - 1; c++)
-            bag[c] = bag[c];
-        for (int c = position - 1; c < bagSize - 1; c++)
-            bag[c] = bag[c+1];
         bagSize--;
         char displayBagSize[3];
         sprintf(displayBagSize, "%d", bagSize);
@@ -279,12 +269,37 @@ int main(void) {
         // }
     }
 
+    // for (int i = 0; i < 7; i++) { // display rack tiles after each tile placing
+    //     if (player1Turn) {
+    //         video_text(30+3*i, 55, rack1[i]);
+    //         video_text(31+3*i, 56, rack1Values[i]);
+    //     }
+    //     else if (!player1Turn) {
+    //         // video_text(30+3*i, 55, rack2[i]);
+    //         // video_text(31+3*i, 56, rack2Values[i]);
+    //     }
+    // }
+
+    video_text(1, 15, "PLAYER 1 TILES");
+    video_text(1, 19, "PLAYER 2 TILES");
+
+    for (int i = 0; i < 7; i++) { // OK WTF
+        video_text(1+i, 16, rack1[i]);
+        video_text(1+i, 17, rack1Values[i]);
+        video_text(1+i, 20, rack2[i]);
+        video_text(1+i, 21, rack2Values[i]);
+    }
+
     int bonusLetterSquares[15][15];
     int bonusWordSquares[15][15];
+    int board[15][15];
+    int tempBoard[15][15];
 
     // set values for bonus letter squares
     for (int i = 0; i < 15; i++) {
         for (int j = 0; j < 15; j++) {
+            board[i][j] = 0;
+            tempBoard[i][j] = 0;
             bonusLetterSquares[i][j] = 1;
             if (i == 0 && (j == 3 || j == 11))
                 bonusLetterSquares[i][j] = 2;
@@ -345,6 +360,10 @@ int main(void) {
             video_text(j, i, " "); // to clear whole board
         }
     }
+
+    int tempScore1 = 0;
+    int tempScore2 = 0;
+    int multiplier = 1;
 
     highlight_tile(x, y);
 
@@ -474,6 +493,10 @@ int main(void) {
             //////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////
         */
+            char* inPlay[8];
+            char* inPlayValues[8];
+            
+            int index = -1;
               if (input2 == (char)0x16) {
                     while (1) {
                         PS2_data = *(PS2_ptr);
@@ -484,13 +507,14 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF016) {
+                                index = 0;
                                 //move select highlight to the left
                                //print tile
-                              if (player1Turn) {
-                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[0]);
-                                } else {
-                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[0]);
-                                }
+                            //   if (player1Turn) {
+                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[0]);
+                            //     } else {
+                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack2[0]);
+                            //     }
                                break;
                             }
                         }
@@ -507,13 +531,14 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF01E) {
+                                index = 1;
                                 //move select highlight to the left
                                //print tile
-                              if (player1Turn) {
-                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[1]);
-                                } else {
-                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[1]);
-                                }
+                            //   if (player1Turn) {
+                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[1]);
+                            //     } else {
+                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack2[1]);
+                            //     }
                                break;
                             }
                         }
@@ -530,12 +555,13 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF026) {
+                                index = 2;
                                 //print tile
-                              if (player1Turn) {
-                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[2]);
-                                } else {
-                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[2]);
-                                }
+                            //   if (player1Turn) {
+                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[2]);
+                            //     } else {
+                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack2[2]);
+                            //     }
                                break;
                             }
                         }
@@ -552,12 +578,13 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF025) {
+                                index = 3;
                                 //print tile
-                              if (player1Turn) {
-                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[3]);
-                                } else {
-                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[3]);
-                                }
+                            //   if (player1Turn) {
+                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[3]);
+                            //     } else {
+                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack2[3]);
+                            //     }
                                break;
                             }
                         }
@@ -574,12 +601,13 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF02E) {
+                                index = 4;
                                 //print tile
-                              if (player1Turn) {
-                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[4]);
-                                } else {
-                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[4]);
-                                }
+                            //   if (player1Turn) {
+                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[4]);
+                            //     } else {
+                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack2[4]);
+                            //     }
                                break;
                             }
                         }
@@ -597,12 +625,13 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF036) {
+                                index = 5;
                                 //print tile
-                              if (player1Turn) {
-                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[5]);
-                                } else {
-                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[5]);
-                                }
+                            //   if (player1Turn) {
+                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[5]);
+                            //     } else {
+                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack2[5]);
+                            //     }
                                break;
                             }
                         }
@@ -619,12 +648,13 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF03D) {
+                                index = 6;
                                 //move select highlight to the left
-                                if (player1Turn) {
-                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[6]);
-                                } else {
-                                    video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[6]);
-                                }
+                                // if (player1Turn) {
+                                //     video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[6]);
+                                // } else {
+                                //     video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack2[6]);
+                                // }
                                break;
                         }
                     }
@@ -644,8 +674,58 @@ int main(void) {
             //////////////////////////////////////////////////////////////////
         */
 
+            if (index >= 0) { // display played tiles on board
+                if (player1Turn) {
+                    if (board[selected_tile[0]][selected_tile[1]] == 0) {
+                        video_text(selected_tile[0]*3 + LEFT, selected_tile[1]*3 + TOP, rack1[index]);
+                        video_text(selected_tile[0]*3 + LEFT+1, selected_tile[1]*3 + TOP+1, rack1Values[index]);
+                        board[selected_tile[0]][selected_tile[1]] = atoi(rack1Values[index]); // put value of tile on board
+                        // tempBoard[selected_tile[0]][selected_tile[1]] = atoi(rack1Values[index]);
+                        tempScore1 += bonusLetterSquares[selected_tile[0]][selected_tile[1]]*atoi(rack1Values[index]);
+                        char displayScore1[4];
+                        sprintf(displayScore1, "%d", tempScore1);
+                        video_text(8, 4, displayScore1); // to be updated after each turn
+                        inPlay[index] = rack1[index];
+                        rack1[index] = " ";
+                        inPlayValues[index] = rack1Values[index];
+                        rack1Values[index] = " ";
+                        if (bonusWordSquares[selected_tile[0]][selected_tile[1]] != 1)
+                            multiplier *= bonusWordSquares[selected_tile[0]][selected_tile[1]];
+                    }
+                } else {
+                    if (board[selected_tile[0]][selected_tile[1]] == 0) {
+                        video_text(selected_tile[0]*3 + LEFT, selected_tile[1]*3 + TOP, rack2[index]);
+                        video_text(selected_tile[0]*3 + LEFT+1, selected_tile[1]*3 + TOP+1, rack2Values[index]);
+                        board[selected_tile[0]][selected_tile[1]] = atoi(rack2Values[index]); // put value of tile on board
+                        // tempBoard[selected_tile[0]][selected_tile[1]] = atoi(rack2Values[index]);
+                        tempScore2 += bonusLetterSquares[selected_tile[0]][selected_tile[1]]*atoi(rack2Values[index]);
+                        char displayScore2[4];
+                        sprintf(displayScore2, "%d", tempScore2);
+                        video_text(73, 4, displayScore2); // to be updated after each turn
+                        inPlay[index] = rack2[index];
+                        rack2[index] = " ";
+                        inPlayValues[index] = rack2Values[index];
+                        rack2Values[index] = " ";
+                        if (bonusWordSquares[selected_tile[0]][selected_tile[1]] != 1)
+                            multiplier *= bonusWordSquares[selected_tile[0]][selected_tile[1]];
+                    }
+                }
+            }
+
+            for (int i = 0; i < 7; i++) { // display rack tiles after each tile placing
+                if (player1Turn) {
+                    video_text(30+3*i, 55, rack1[i]);
+                    video_text(31+3*i, 56, rack1Values[i]);
+                }
+                else if (!player1Turn) {
+                    video_text(30+3*i, 55, rack2[i]);
+                    video_text(31+3*i, 56, rack2Values[i]);
+                }
+            }
+
             //IF THE PLAYER PRESSES ENTER (TO END THEIR TURN)
             if (input2 == (char)0x5A) {
+
                     while (1) {
                         PS2_data = *(PS2_ptr);
                         int RVALID = PS2_data & 0x8000;
@@ -656,21 +736,137 @@ int main(void) {
                             //if the key is released
                             if (input2 == (char)0xF05A) {
                                 
-                               //Switch the player turns
-                               player1Turn = !player1Turn;
-                               draw_board();
-                               highlight_tile(7, 7);
-                               selected_tile[0] = 7;
-                               selected_tile[1] = 7;
-                               video_text(0, 14, "switched players");
-                               
-                               break;
+                                //Switch the player turns
+                                player1Turn = !player1Turn;
+                                draw_board();
+                                highlight_tile(7, 7);
+                                selected_tile[0] = 7;
+                                selected_tile[1] = 7;
+                                video_text(0, 14, "switched players");
+
+                                // show/hide player turn message
+                                if (player1Turn) {
+                                    video_text(1, 52, "PLAYER 1 TURN");
+                                    video_text(66, 52, "             ");
+                                    score2 += multiplier*tempScore2;
+                                    char displayScore2[4];
+                                    sprintf(displayScore2, "%d", score2);
+                                    video_text(73, 3, displayScore2); // to be updated after each turn
+                                    tempScore2 = 0;
+                                    multiplier = 1;
+                                    video_text(73, 4, "0 "); // to be updated after each turn
+                                }
+                                else if (!player1Turn) {
+                                    video_text(66, 52, "PLAYER 2 TURN");
+                                    video_text(1, 52, "             ");
+                                    score1 += multiplier*tempScore1;
+                                    char displayScore1[4];
+                                    sprintf(displayScore1, "%d", score1);
+                                    video_text(8, 3, displayScore1); // to be updated after each turn
+                                    tempScore1 = 0;
+                                    multiplier = 1;
+                                    video_text(8, 4, "0 "); // to be updated after each turn
+                                }
+
+                                for (int i = 0; i < 7; i++) {
+                                    char *bag[bagSize]; // create the array for the tile bag
+                                    int subcounter = 0;
+                                    for (int a = 0; a < 26; a++) {
+                                        for (int b = 0; b < letterCount[a]; b++) {
+                                            bag[subcounter] = letters[a];
+                                            subcounter++;
+                                        }
+                                    }
+
+                                    // for (int j = 0; j < 80; j++) {
+                                    //     video_text(j, 53+i, bag[j]);
+                                    // }
+
+                                    int position = rand() % bagSize; // pick random tile from bag
+                                    
+                                    if (!player1Turn) { // Player 2 turn, refill Player 1 rack
+                                        if (rack1[i] == " ") {
+                                            int pos = rand() % bagSize; // pick random tile from bag
+                                            rack1[i] = bag[pos];
+                                            // video_text(30+3*i, 55, rack1[i]); // show new tile on rack
+                                            // update letter count to reflect tile taken out
+                                            for (int j = 0; j < 26; j++) {
+                                                if (bag[pos] == letters[j]) {
+                                                    if (letterCount[j] == 0)
+                                                        video_text(1, 6, "FUCK");
+                                                    letterCount[j] -= 1;
+                                                    rack1Values[i] = values[j];
+                                                    break;
+                                                }
+                                            }
+                                            bagSize--;
+                                        }
+                                    }
+
+                                    if (player1Turn) { // Player 1 turn, refill Player 2 rack
+                                        if (rack2[i] == " ") {
+                                            int pos = rand() % bagSize; // pick random tile from bag
+                                            rack2[i] = bag[pos];
+                                            // video_text(30+3*i, 55, rack2[i]); // show new tile on rack
+                                            // update letter count to reflect tile taken out
+                                            for (int j = 0; j < 26; j++) {
+                                                if (bag[pos] == letters[j]) {
+                                                    if (letterCount[j] == 0)
+                                                        video_text(1, 6, "FUCK");
+                                                    letterCount[j] -= 1;
+                                                    rack1Values[i] = values[j];
+                                                    break;
+                                                }
+                                            }
+                                            bagSize--;
+                                        }
+                                    }
+
+                                    // char temp[3];
+                                    // sprintf(temp, "%d", bagSize);
+                                    // video_text(1, 40+i, temp);
+
+                                    char displayBagSize[3];
+                                    sprintf(displayBagSize, "%d", bagSize);
+                                    video_text(48, 58, displayBagSize);
+                                    if (bagSize < 10)
+                                        video_text(49, 58, " ");
+
+                                    // for (int k = 0; k < 26; k++) {
+                                    //     char temp1[3];
+                                    //     sprintf(temp1, "%d", letterCount[k]);
+                                    //     video_text(3+2*i, 10+k, temp1);
+                                    // }
+                                }
+
+                                // clear tempBoard
+                                // for (int i = 0; i < 15; i++) {
+                                //     for (int j = 0; j < 15; j++) {
+                                //         tempBoard[i][j] = 0;
+                                //     }
+                                // }
+
+                                for (int i = 0; i < 7; i++) { // display rack tiles after each tile placing
+                                    if (player1Turn) {
+                                        video_text(30+3*i, 55, rack1[i]);
+                                        video_text(31+3*i, 56, rack1Values[i]);
+                                    }
+                                    else if (!player1Turn) {
+                                        video_text(30+3*i, 55, rack2[i]);
+                                        video_text(31+3*i, 56, rack2Values[i]);
+                                    }
+                                }
+
+                                break;
+                            }
                         }
                     }
-                }
             }
 
         }
+
+
+
   
 
         //SW_data = *(SW_ptr);
@@ -820,16 +1016,6 @@ void color_square(int x, int y, short int color) {
     //draw_line(x_coord, y_coord, x_coord, y_coord+12, RED); //left line
     //draw_line(x_coord+12, y_coord, x_coord+12, y_coord+12, RED); //right line
 }
-
-// void draw_board() {
-//     for (int i = 47; i < 274; i+= 15) {
-//         draw_line(i, 7, i, 232, WHITE);
-//     }
-
-//     for (int i = 7; i < 233; i+= 15) {
-//         draw_line(47, i, 273, i, WHITE);
-//     }
-// }
 
 void highlight_tile(int x, int y) {
 
