@@ -114,7 +114,7 @@
 #include <string.h>
 #include <math.h>
 
-// Begin part3.c code for Lab 7
+// Function parameters
 void wait_for_vsync();
 void clear_screen();
 void draw_line(int x0, int y0, int x1, int y1, short int line_color);
@@ -508,13 +508,6 @@ int main(void) {
                             //if the key is released
                             if (input2 == (char)0xF016) {
                                 index = 0;
-                                //move select highlight to the left
-                               //print tile
-                            //   if (player1Turn) {
-                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[0]);
-                            //     } else {
-                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack2[0]);
-                            //     }
                                break;
                             }
                         }
@@ -532,13 +525,6 @@ int main(void) {
                             //if the key is released
                             if (input2 == (char)0xF01E) {
                                 index = 1;
-                                //move select highlight to the left
-                               //print tile
-                            //   if (player1Turn) {
-                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[1]);
-                            //     } else {
-                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack2[1]);
-                            //     }
                                break;
                             }
                         }
@@ -556,12 +542,6 @@ int main(void) {
                             //if the key is released
                             if (input2 == (char)0xF026) {
                                 index = 2;
-                                //print tile
-                            //   if (player1Turn) {
-                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[2]);
-                            //     } else {
-                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack2[2]);
-                            //     }
                                break;
                             }
                         }
@@ -579,12 +559,6 @@ int main(void) {
                             //if the key is released
                             if (input2 == (char)0xF025) {
                                 index = 3;
-                                //print tile
-                            //   if (player1Turn) {
-                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[3]);
-                            //     } else {
-                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack2[3]);
-                            //     }
                                break;
                             }
                         }
@@ -602,12 +576,6 @@ int main(void) {
                             //if the key is released
                             if (input2 == (char)0xF02E) {
                                 index = 4;
-                                //print tile
-                            //   if (player1Turn) {
-                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[4]);
-                            //     } else {
-                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack2[4]);
-                            //     }
                                break;
                             }
                         }
@@ -626,12 +594,6 @@ int main(void) {
                             //if the key is released
                             if (input2 == (char)0xF036) {
                                 index = 5;
-                                //print tile
-                            //   if (player1Turn) {
-                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[5]);
-                            //     } else {
-                            //         video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack2[5]);
-                            //     }
                                break;
                             }
                         }
@@ -649,12 +611,62 @@ int main(void) {
                             //if the key is released
                             if (input2 == (char)0xF03D) {
                                 index = 6;
-                                //move select highlight to the left
-                                // if (player1Turn) {
-                                //     video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[6]);
-                                // } else {
-                                //     video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack2[6]);
-                                // }
+                               break;
+                        }
+                    }
+                }
+            }
+
+            //IF THE DELETE KEY WAS PRESSED
+            if (input2 == (char)0xE071) {
+                    while (1) {
+                        PS2_data = *(PS2_ptr);
+                        int RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF0E071) {
+                                //For player 1's turn
+                               if (player1Turn) {
+                                    if (board[selected_tile[0]][selected_tile[1]] != 0) {
+                                        //Draws on the board
+                                        video_text(selected_tile[0]*3 + LEFT, selected_tile[1]*3 + TOP,  " ");
+                                        video_text(selected_tile[0]*3 + LEFT+1, selected_tile[1]*3 + TOP+1, " ");
+                                        //board[selected_tile[0]][selected_tile[1]] = atoi(rack1Values[index]); // put value of tile on rack
+                                        //Draws on the rack
+                                        //for (int i = 0; i < )
+                                        //board is an int array that holds the index of the placed tile. so to put it back on the rack
+                                        //place the letter at the selected tile back to the index in board. 
+                                        int rack_index = board[selected_tile[0]][selected_tile[1]];
+                                        //rack1[rack_index] = ;
+                                       // rack1[rack_index] = "A";
+                                        //board[selected_tile[0]][selected_tile[1]] = 0;
+                                        rack1[rack_index] = inPlay[rack_index];
+                                       // rack1Values[rack_index] = inPlayValues[rack_index];
+                                        inPlay[rack_index] = 0;
+                                        for (int i = 0; i < 7; i++) { // display rack tiles after each tile placing
+                                            video_text(30+3*i, 55, rack1[i]);
+                                          //  video_text(31+3*i, 56, rack1Values[i]);
+                                        }
+                                    }
+                               }
+                               //For player 2's turn
+                               else {
+                                    if (board[selected_tile[0]][selected_tile[1]] != 0) {
+                                        //Draws on the board
+                                        video_text(selected_tile[0]*3 + LEFT, selected_tile[1]*3 + TOP,  " ");
+                                        video_text(selected_tile[0]*3 + LEFT+1, selected_tile[1]*3 + TOP+1, " ");
+                                        //Draws on the rack
+
+                                        rack2Values[index] = inPlayValues[index];
+                                        inPlay[index] = 0;
+
+                                        
+                                    }
+                               }
+
                                break;
                         }
                     }
@@ -673,6 +685,9 @@ int main(void) {
             //////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////
         */
+
+
+
 
             if (index >= 0) { // display played tiles on board
                 if (player1Turn) {
@@ -742,7 +757,7 @@ int main(void) {
                                 highlight_tile(7, 7);
                                 selected_tile[0] = 7;
                                 selected_tile[1] = 7;
-                                video_text(0, 14, "switched players");
+                                //video_text(0, 14, "switched players");
 
                                 // show/hide player turn message
                                 if (player1Turn) {
@@ -885,51 +900,11 @@ int main(void) {
            else {
                video_text(1, 10, "whyyy");
            }*/
-           
-           // while(*KEY_ptr != 0);// wait for pushbutton KEY release
-
-            //draw the character from the row on the selected square
-            //rack1[SW_data]; is the letter
-            //video_text(1, 6, rack1[SW_data]);
-            
-        /*if(*KEY_ptr == 1)// check if any KEY was pressed
-        {
-            video_text(1, 8, "another test");
-            // while(*KEY_ptr != 0);// wait for pushbutton KEY release
-        }
-        if(*KEY_ptr == 2)// check if any KEY was pressed
-        {
-            video_text(1, 8, "aaaaaaa");
-             while(*KEY_ptr != 0);// wait for pushbutton KEY release
-        }
-        if(*KEY_ptr == 3)// check if any KEY was pressed
-        {
-            video_text(1, 8, "bbbbbbb");
-             while(*KEY_ptr != 0);// wait for pushbutton KEY release
-        }
-        if(*KEY_ptr == 12 && gameOver == 2)// check if a player presses the PASS key 
-        {
-            video_text(1, 9, "You have chosen to pass. Next player's turn");
-            gameOver--;
-             //while(*KEY_ptr != 0);// wait for pushbutton KEY release
-        }
-        if(*KEY_ptr == 12 && gameOver == 1)// check if a player presses the PASS key 
-        {
-            video_text(1, 9, "You have passed for the second time in a row. ");
-            gameOver--;
-             //while(*KEY_ptr != 0);// wait for pushbutton KEY release
-        }*/
 
 
-        //if (RVALID) {
-            
-        //}
     }
 }
 
- //void checkTileSelected(int PS2_data, int selected_x, int selected_y, char input2, char* letter) {
-
- //}
 
 void draw_board() {
     for (int i = 68; i < 249; i+= 12) {
