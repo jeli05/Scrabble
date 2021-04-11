@@ -114,6 +114,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <string.h>
+#include <math.h>
 
 // Begin part3.c code for Lab 7
 void wait_for_vsync();
@@ -157,6 +158,7 @@ int main(void) {
     int x, y;
     x = 7;
     y = 7;
+    int gameOver = 2;
 
     clear_screen();
 
@@ -341,7 +343,7 @@ int main(void) {
 
     highlight_tile(x, y);
 
-    while (1) {
+    while (gameOver != 0) {
 		PS2_data = *(PS2_ptr);
         RVALID = PS2_data & 0x8000;
 
@@ -461,12 +463,46 @@ int main(void) {
         //{
             HEX_bits = SW_data;// set pattern using SW values
 
-            if (SW_data = 2) {
+            if (SW_data == 1 || SW_data == 2 || SW_data == 4 ||
+			   SW_data == 8 || SW_data == 16 || SW_data == 32 || SW_data ==64) {
+                int tile = (log(SW_data)/log(2));
+                 video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[tile]);
+                 //video_text(1, 8, "another test 0");
+           }
+           else {
+               video_text(1, 10, "whyyy");
+           }
+           /* else if (SW_data = 1) {
                  video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[SW_data]);
+                 video_text(1, 8, "another test 1");
             }
-            else if (HEX_bits = 2) {
+            else if (SW_data = 2) {
+                 video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[SW_data]);
+                 video_text(1, 8, "another test 2");
+            }
+            else if (SW_data = 3) {
+                 video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[SW_data]);
+                 video_text(1, 8, "another test 3");
+            }
+            else if (SW_data = 4) {
+                 video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[SW_data]);
+                 video_text(1, 8, "another test 4");
+            }
+            else if (SW_data = 5) {
+                 video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[SW_data]);
+                 video_text(1, 8, "another test 5");
+            }
+            else if (SW_data = 6) {
+                 video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[SW_data]);
+                 video_text(1, 8, "another test 6");
+            }
+            else if (SW_data = 7) {
+                 video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[SW_data]);
+                 video_text(1, 8, "another test 7");
+            }*/
+           // else if (HEX_bits = 2) {
                 //video_text(1, 8, "another test");
-            }
+           // }
            
            // while(*KEY_ptr != 0);// wait for pushbutton KEY release
 
