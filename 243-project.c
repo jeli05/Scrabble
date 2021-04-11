@@ -210,12 +210,24 @@ int main(void) {
     char* rack1Values[8];
     char* rack2Values[8];
 
+    char* previousRack[8];
+    char* previousRackValues[8];
+
+
      char* inPlay[8];
      char* inPlayValues[8];
+     char* prevInPlay[8];
+     char* prevInPlayValues[8];
 
      for (int i = 0; i < 8; i++) {
           inPlay[i] = " ";
           inPlayValues[i] = " ";
+
+          prevInPlay[i] = " ";
+          prevInPlayValues[i] = " ";
+
+          previousRack[i] = " ";
+          previousRackValues[i] = " ";
      }
     
     for (int i = 0; i < 14; i++) { // assign 7 random tiles each at the beginning
@@ -312,10 +324,17 @@ int main(void) {
     int wordBoard[15][15];
 
     int boardThisTurn[15][15];
+    int boardPreviousTurn[15][15];
+
+    int prevBoard[15][15];
+    int prevTempBoard[15][15];
 
    for (int i = 0; i < 15; i++) {
         for (int j = 0; j < 15; j++) {
             boardThisTurn[i][j] = 0;
+            boardPreviousTurn[i][j] = 0;
+            prevBoard[i][j] = 0;
+            prevTempBoard[i][j]  = 0;
         }
     }
 
@@ -684,6 +703,10 @@ int main(void) {
                                             video_text(31+3*i, 56, rack1Values[i]);
                                         }
                                     }
+                                    else {
+                                        video_text(67, 50,"p1 cant delete");
+                                    }
+
                                }
                                //For player 2's turn
                                else {
@@ -718,6 +741,9 @@ int main(void) {
                                         }
                                         
                                     }
+                                     else {
+                                        video_text(67, 50,"p2 cant delete");
+                                    }
                                }
 
                                break;
@@ -741,7 +767,9 @@ int main(void) {
 
 
 
-
+            //
+            //this is where letter selection gets handled
+            //
             if (index >= 0) { // display played tiles on board
                 int xcoord = selected_tile[0];
                 int ycoord = selected_tile[1];
@@ -815,6 +843,21 @@ int main(void) {
                             //if the key is released
                             if (input2 == (char)0xF05A) {
                                 
+
+                                for (int i = 0; i < 7; i++) {
+
+                                   prevInPlay[i] = inPlay[i];
+                                   prevInPlayValues[i] = inPlayValues[i];
+
+                                   if (player1Turn) {
+                                        previousRack[i] = rack1[i];
+                                        previousRackValues[i] = rack1Values[i];
+                                   }
+                                   else {
+                                        previousRack[i] = rack2[i];
+                                        previousRackValues[i] = rack2Values[i];
+                                   } 
+                                }
                                 //Switch the player turns
                                 player1Turn = !player1Turn;
                                 draw_board();
@@ -822,8 +865,14 @@ int main(void) {
                                 // selected_tile[0] = 7;
                                 // selected_tile[1] = 7;
                                 //video_text(0, 14, "switched players");
+                                
+
+
                                 for (int i = 0; i < 15; i++) {
                                     for (int j = 0; j < 15; j++) {
+                                        boardPreviousTurn[i][j] = boardThisTurn[i][j];
+                                        prevTempBoard[i][j] = tempBoard[i][j];
+                                        prevBoard[i][j] = board[i][j];
                                         boardThisTurn[i][j] = 0;
                                     }
                                 }
@@ -1028,7 +1077,101 @@ int main(void) {
                     }
             }
 
-        }
+            ///////////////////////////////////////////////////
+            ///////////////////////////////////////////////////////
+            //IF THE PLAYER CHALLENGES THE LAST TURN
+            /////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////
+            if (input2 == (char)0x29) {
+                    while (1) {
+                        PS2_data = *(PS2_ptr);
+                        int RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF029) {
+                                
+                                //challenge the turn
+                                video_text(60, 20, "challenged the last turn!");
+
+                                player1Turn = !player1Turn;
+                                
+                             
+                             
+                                for (int i = 0; i < 15; i++) {
+                                    for (int j = 0; j < 15; j++) {
+                                        boardThisTurn[i][j] = boardPreviousTurn[i][j];
+                                        tempBoard[i][j] = prevTempBoard[i][j];
+                                        board[i][j] = prevBoard[i][j];
+                                    }
+                                }
+
+
+                                draw_board();
+                                highlight_tile(selected_tile[0], selected_tile[1]);
+
+                                for (int i = 0; i < 7; i++) { // display rack tiles after each tile placing
+
+                                   inPlay[i] = prevInPlay[i]; 
+                                   inPlayValues[i] = prevInPlayValues[i];
+
+                                    if (player1Turn) {
+                                        rack1[i] = previousRack[i];
+                                        rack1Values[i] = previousRackValues[i];
+                                        video_text(30+3*i, 55, rack1[i]);
+                                        video_text(31+3*i, 56, rack1Values[i]);
+                                    }
+                                    else if (!player1Turn) {
+                                        rack2[i] = previousRack[i];
+                                         rack2Values[i] = previousRackValues[i];
+                                        video_text(30+3*i, 55, rack2[i]);
+                                        video_text(31+3*i, 56, rack2Values[i]);
+                                    }
+                                }
+
+
+                                // show/hide player turn message
+                                if (player1Turn) {
+                                    video_text(1, 52, "PLAYER 1 TURN");
+                                    video_text(66, 52, "             ");
+                                   /* char turnScore2[3];
+                                    sprintf(turnScore2, "%d", multiplier*tempScore2);
+                                    video_text(71, 8+turnNumber2, turnScore2);
+                                    score2 += multiplier*tempScore2;
+                                    char displayScore2[4];
+                                    sprintf(displayScore2, "%d", score2);
+                                    video_text(73, 3, displayScore2); // to be updated after each turn
+                                    tempScore2 = 0;
+                                    multiplier = 1;
+                                    video_text(73, 4, "0 "); // to be updated after each turn
+                                    turnNumber2++;*/
+                                }
+                                else if (!player1Turn) {
+                                    video_text(66, 52, "PLAYER 2 TURN");
+                                    video_text(1, 52, "             ");
+                                   /* char turnScore1[3];
+                                    sprintf(turnScore1, "%d", multiplier*tempScore1);
+                                    video_text(64, 8+turnNumber1, turnScore1);
+                                    score1 += multiplier*tempScore1;
+                                    char displayScore1[4];
+                                    sprintf(displayScore1, "%d", score1);
+                                    video_text(8, 3, displayScore1); // to be updated after each turn
+                                    tempScore1 = 0;
+                                    multiplier = 1;
+                                    video_text(8, 4, "0 "); // to be updated after each turn
+                                    turnNumber1++;*/
+                                }
+
+                               break;
+                        }
+                    }
+                }
+            }
+
+
+        } //THIS IS THE END OF THE WHILE LOOP
 
 
 
