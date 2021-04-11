@@ -794,10 +794,11 @@ int main(void) {
                                 //Switch the player turns
                                 player1Turn = !player1Turn;
                                 draw_board();
-                                highlight_tile(7, 7);
-                                selected_tile[0] = 7;
-                                selected_tile[1] = 7;
-                                //video_text(0, 14, "switched players");
+
+                                highlight_tile(selected_tile[0], selected_tile[1]);
+                               // selected_tile[0] = 7;
+                               // selected_tile[1] = 7;
+
                                 for (int i = 0; i < 15; i++) {
                                     for (int j = 0; j < 15; j++) {
                                         boardThisTurn[i][j] = 0;
