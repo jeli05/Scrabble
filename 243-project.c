@@ -647,7 +647,7 @@ int main(void) {
                             if (input2 == (char)0xF0E071) {
                                 //For player 1's turn
                                if (player1Turn) {
-                                    if (board[selected_tile[0]][selected_tile[1]] != 0) {
+                                    if (tempBoard[selected_tile[1]][selected_tile[0]] != 0) {
                                         //Draws on the board
                                         video_text(selected_tile[0]*3 + LEFT, selected_tile[1]*3 + TOP,  " ");
                                         video_text(selected_tile[0]*3 + LEFT+1, selected_tile[1]*3 + TOP+1, " ");
@@ -663,6 +663,8 @@ int main(void) {
                                         rack1Values[rack_index] = inPlayValues[rack_index];
                                        
                                         inPlay[rack_index] = 0;
+                                        tempBoard[selected_tile[1]][selected_tile[0]] = 0;
+
                                         for (int i = 0; i < 7; i++) { // display rack tiles after each tile placing
                                             video_text(30+3*i, 55, rack1[i]);
                                             video_text(31+3*i, 56, rack1Values[i]);
@@ -671,7 +673,7 @@ int main(void) {
                                }
                                //For player 2's turn
                                else {
-                                    if (board[selected_tile[0]][selected_tile[1]] != 0) {
+                                    if (tempBoard[selected_tile[1]][selected_tile[0]] != 0) {
                                         //Draws on the board
                                         video_text(selected_tile[0]*3 + LEFT, selected_tile[1]*3 + TOP,  " ");
                                         video_text(selected_tile[0]*3 + LEFT+1, selected_tile[1]*3 + TOP+1, " ");
@@ -687,6 +689,8 @@ int main(void) {
                                         rack2Values[rack_index] = inPlayValues[rack_index];
                                        
                                         inPlay[rack_index] = 0;
+                                        tempBoard[selected_tile[1]][selected_tile[0]] = 0;
+
                                         for (int i = 0; i < 7; i++) { // display rack tiles after each tile placing
                                             video_text(30+3*i, 55, rack2[i]);
                                             video_text(31+3*i, 56, rack2Values[i]);
@@ -751,6 +755,9 @@ int main(void) {
                         sprintf(displayScore2, "%d", tempScore2);
                         video_text(73, 4, displayScore2); // to be updated after each turn
                         inPlay[index] = rack2[index];
+
+                        boardThisTurn[selected_tile[0]][selected_tile[1]] = index;
+
                         rack2[index] = " ";
                         inPlayValues[index] = rack2Values[index];
                         rack2Values[index] = " ";
