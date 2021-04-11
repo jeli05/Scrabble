@@ -181,6 +181,10 @@ int main(void) {
 
     int score1 = 0;
     int score2 = 0;
+    int turnNumber1 = 0;
+    int turnNumber2 = 0;
+
+    video_text(1, 52, "PLAYER 1 TURN");
 
     video_text(1, 1, "PLAYER 1");
     video_text(1, 3, "SCORE: ");
@@ -189,6 +193,10 @@ int main(void) {
     video_text(66, 1, "PLAYER 2");
     video_text(66, 3, "SCORE: ");
     video_text(73, 3, "0"); // to be updated after each turn
+
+    video_text(64, 6, "POINTS BY TURN:");
+    video_text(64, 7, "P1:");
+    video_text(71, 7, "P2:");
 
     video_text(29, 52, "THESE ARE YOUR TILES:");
     video_text(29, 58, "TILES LEFT IN BAG:");
@@ -268,8 +276,6 @@ int main(void) {
         char displayBagSize[3];
         sprintf(displayBagSize, "%d", bagSize);
         video_text(48, 58, displayBagSize);
-        if (bagSize < 10)
-            video_text(49, 58, " ");
 
         // for (int k = 0; k < 26; k++) {
         //     char temp1[3];
@@ -665,7 +671,13 @@ int main(void) {
                                        
                                         inPlay[rack_index] = 0;
                                         tempBoard[selected_tile[1]][selected_tile[0]] = 0;
+
                                         tilesPlacedThisTurn--;
+
+                                        tempScore1 -= bonusLetterSquares[selected_tile[1]][selected_tile[0]]*atoi(rack1Values[rack_index]);
+                                        char displayScore1[4];
+                                        sprintf(displayScore1, "%d", tempScore1);
+                                        video_text(8, 4, displayScore1); // to be updated after each turn
 
                                         for (int i = 0; i < 7; i++) { // display rack tiles after each tile placing
                                             video_text(30+3*i, 55, rack1[i]);
@@ -692,7 +704,13 @@ int main(void) {
                                        
                                         inPlay[rack_index] = 0;
                                         tempBoard[selected_tile[1]][selected_tile[0]] = 0;
+
                                         tilesPlacedThisTurn--;
+
+                                        tempScore2 -= bonusLetterSquares[selected_tile[1]][selected_tile[0]]*atoi(rack2Values[rack_index]);
+                                        char displayScore2[4];
+                                        sprintf(displayScore2, "%d", tempScore2);
+                                        video_text(73, 4, displayScore2); // to be updated after each turn
 
                                         for (int i = 0; i < 7; i++) { // display rack tiles after each tile placing
                                             video_text(30+3*i, 55, rack2[i]);
@@ -782,7 +800,6 @@ int main(void) {
                     video_text(31+3*i, 56, rack2Values[i]);
                 }
             }
-
             /////////////////////////////////////////////////
             //IF THE PLAYER PRESSES ENTER (TO END THEIR TURN)
             /////////////////////////////////////////////////
@@ -801,11 +818,10 @@ int main(void) {
                                 //Switch the player turns
                                 player1Turn = !player1Turn;
                                 draw_board();
-
                                 highlight_tile(selected_tile[0], selected_tile[1]);
-                               // selected_tile[0] = 7;
-                               // selected_tile[1] = 7;
-
+                                // selected_tile[0] = 7;
+                                // selected_tile[1] = 7;
+                                //video_text(0, 14, "switched players");
                                 for (int i = 0; i < 15; i++) {
                                     for (int j = 0; j < 15; j++) {
                                         boardThisTurn[i][j] = 0;
@@ -876,6 +892,9 @@ int main(void) {
                                 if (player1Turn) {
                                     video_text(1, 52, "PLAYER 1 TURN");
                                     video_text(66, 52, "             ");
+                                    char turnScore2[3];
+                                    sprintf(turnScore2, "%d", multiplier*tempScore2);
+                                    video_text(71, 8+turnNumber2, turnScore2);
                                     score2 += multiplier*tempScore2;
                                     char displayScore2[4];
                                     sprintf(displayScore2, "%d", score2);
@@ -883,10 +902,14 @@ int main(void) {
                                     tempScore2 = 0;
                                     multiplier = 1;
                                     video_text(73, 4, "0 "); // to be updated after each turn
+                                    turnNumber2++;
                                 }
                                 else if (!player1Turn) {
                                     video_text(66, 52, "PLAYER 2 TURN");
                                     video_text(1, 52, "             ");
+                                    char turnScore1[3];
+                                    sprintf(turnScore1, "%d", multiplier*tempScore1);
+                                    video_text(64, 8+turnNumber1, turnScore1);
                                     score1 += multiplier*tempScore1;
                                     char displayScore1[4];
                                     sprintf(displayScore1, "%d", score1);
@@ -894,6 +917,7 @@ int main(void) {
                                     tempScore1 = 0;
                                     multiplier = 1;
                                     video_text(8, 4, "0 "); // to be updated after each turn
+                                    turnNumber1++;
                                 }
 
                                 for (int i = 0; i < 7; i++) {
@@ -959,6 +983,8 @@ int main(void) {
                                     video_text(48, 58, displayBagSize);
                                     if (bagSize < 10)
                                         video_text(49, 58, " ");
+                                    if (bagSize == 0) // empty bag
+                                        break;
 
                                     // for (int k = 0; k < 26; k++) {
                                     //     char temp1[3];
@@ -988,7 +1014,6 @@ int main(void) {
                                 //char tempText[1] = " ";
                                 //sprintf(tempText, "%d", gameOver);
                                 //video_text(66, 30, tempText);
-
                                 if (tilesPlacedThisTurn == 0) {
                                     gameOver--;
                                 }
@@ -1032,14 +1057,13 @@ int main(void) {
     video_text(66, 28, "GAME OVER");
     if (score1 > score2) {
         video_text(65, 30, "Player 1 wins!");
-    } 
+    }
     else if (score1 < score2) {
         video_text(65, 30, "Player 2 wins!");
     }
     else {
         video_text(65, 30, "It's a tie!");
     }
-
 }
 
 
