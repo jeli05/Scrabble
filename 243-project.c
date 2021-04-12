@@ -922,7 +922,7 @@ int main(void) {
                     // video_text(65, 16, tempChar[0]); 
                      rack1[index] = letters[letterInt];
                      video_text(selected_tile[0]*3 + LEFT, selected_tile[1]*3 + TOP, rack1[index]); 
-                     rack1[index] = "";
+                     rack1[index] = " ";
             }
             else if (!player1Turn && blankTilePlaced) {
                      //video_text(60, 10, "p2 it's the blank tile!"); 
@@ -931,7 +931,7 @@ int main(void) {
                      //video_text(65, 16, tempChar[0]); 
                      rack2[index] = letters[letterInt];
                      video_text(selected_tile[0]*3 + LEFT, selected_tile[1]*3 + TOP, rack2[index]); 
-                     rack2[index] = "";
+                     rack2[index] = " ";
             }
 
             // EXCHANGE BEGIN
@@ -1410,29 +1410,6 @@ int main(void) {
 
 
         } //THIS IS THE END OF THE WHILE LOOP
-
-
-
-  
-
-        //SW_data = *(SW_ptr);
-        //RVALID = SW_data & 0x8000;
-
-        //if(*KEY_ptr != 0)// check if any KEY was pressed
-        //{
-           // HEX_bits = SW_data;// set pattern using SW values
-
-           /* if (SW_data == 1 || SW_data == 2 || SW_data == 4 ||
-			   SW_data == 8 || SW_data == 16 || SW_data == 32 || SW_data ==64) {
-                int tile = (log(SW_data)/log(2));
-                 video_text(selected_tile[0]*3 + 18, selected_tile[1]*3 + 6, rack1[tile]);
-                 //video_text(1, 8, "another test 0");
-           }
-           else {
-               video_text(1, 10, "whyyy");
-           }*/
-
-
     }
 
     video_text(66, 28, "GAME OVER");
