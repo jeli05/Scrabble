@@ -126,7 +126,7 @@ void highlight_tile(int x, int y);
 void video_text(int x, int y, char * text_ptr);
 void color_tiles(int row, int col);
 void checkTileSelected(int PS2_data, int selected_x, int selected_y, char input2);
-char chooseLetter(char input2, int PS2_data);
+int chooseLetter(char input2, int PS2_data);
 
 
 volatile int pixel_buffer_start; // global variable
@@ -866,22 +866,23 @@ int main(void) {
             //////////////
             //if the tile is blank
             ////////////////
-            char tempChar[1] = "";
+            char* tempChar = " ";
+            int letterInt = 0;
             if (player1Turn && blankTilePlaced) {
                      //video_text(60, 10, "p1 it's the blank tile!"); 
-                     tempChar[0] = chooseLetter(input2, PS2_data);
+                     letterInt = chooseLetter(input2, PS2_data);
                      //video_text(65, 15, "TEST1"); 
                     // video_text(65, 16, tempChar[0]); 
-                     rack1[index] = &tempChar[0];
+                     rack1[index] = letters[letterInt];
                      video_text(selected_tile[0]*3 + LEFT, selected_tile[1]*3 + TOP, rack1[index]); 
                      rack1[index] = "";
             }
             else if (!player1Turn && blankTilePlaced) {
                      //video_text(60, 10, "p2 it's the blank tile!"); 
-                     tempChar[0] = chooseLetter(input2, PS2_data);
+                     letterInt = chooseLetter(input2, PS2_data);
                      //video_text(65, 15, "TEST1"); 
                      //video_text(65, 16, tempChar[0]); 
-                     rack2[index] = &tempChar[0];
+                     rack2[index] = letters[letterInt];
                      video_text(selected_tile[0]*3 + LEFT, selected_tile[1]*3 + TOP, rack2[index]); 
                      rack2[index] = "";
             }
@@ -1226,7 +1227,7 @@ int main(void) {
                             if (input2 == (char)0xF029) {
                                 
                                 //challenge the turn
-                                video_text(60, 20, "challenged the last turn!");
+                                video_text(60, 20, "challenged!");
 
                                 player1Turn = !player1Turn;
                                 
@@ -1528,11 +1529,12 @@ void wait_for_vsync() {
 }
 
 
-char chooseLetter(char input2, int PS2_data) {
+int chooseLetter(char input2, int PS2_data) {
 
     bool notDone = true;
     //video_text(60, 30, "when does this get called");
-    char returnChar;
+     //char* returnChar;
+     int returnChar;
 
     while(notDone) {
 
@@ -1554,9 +1556,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF01C) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'A';
+                                returnChar = 0;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1577,9 +1579,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF032) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'B';
+                                returnChar = 1;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1600,9 +1602,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF021) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'C';
+                                returnChar = 2;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1622,9 +1624,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF023) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'D';
+                                returnChar = 3;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1643,9 +1645,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF024) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'E';
+                                returnChar = 4;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1664,9 +1666,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF02B) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'F';
+                                returnChar = 5;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1685,9 +1687,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF034) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'G';
+                                returnChar = 6;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1706,9 +1708,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF033) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'H';
+                                returnChar = 7;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1727,9 +1729,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF043) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'I';
+                                returnChar = 8;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1748,9 +1750,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF03B) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'J';
+                                returnChar = 9;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1769,9 +1771,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF042) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'K';
+                                returnChar = 10;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1790,9 +1792,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF04B) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'L';
+                                returnChar = 11;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1811,9 +1813,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF03A) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'M';
+                                returnChar = 12;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1832,9 +1834,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF031) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'N';
+                                returnChar = 13;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1853,9 +1855,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF044) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'O';
+                                returnChar = 14;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1874,9 +1876,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF04D) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'P';
+                                returnChar = 15;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1895,9 +1897,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF015) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'Q';
+                                returnChar = 16;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1916,9 +1918,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF02D) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'R';
+                                returnChar = 17;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1937,9 +1939,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF01B) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'S';
+                                returnChar = 18;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1958,9 +1960,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF02C) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'T';
+                                returnChar = 19;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                               // return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -1979,9 +1981,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF03C) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'U';
+                                returnChar = 20;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                               // return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -2000,9 +2002,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF02A) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'V';
+                                returnChar = 21;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -2021,9 +2023,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF01D) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'W';
+                                returnChar = 22;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -2042,9 +2044,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF022) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'X';
+                                returnChar = 23;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                                //return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -2063,9 +2065,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF035) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'Y';
+                                returnChar = 24;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                               // return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -2083,9 +2085,9 @@ char chooseLetter(char input2, int PS2_data) {
                             //if the key is released
                             if (input2 == (char)0xF01A) {
                                 //DO STUFF WITH THE KEY
-                                returnChar = 'Z';
+                                returnChar = 25;
                                 //video_text(60, 30, "wow this works");
-                                return returnChar;
+                               // return returnChar;
                                 notDone = false;
                                break;
                             }
@@ -2095,6 +2097,6 @@ char chooseLetter(char input2, int PS2_data) {
             }   
     }
 
-return "a";
+return returnChar;
 
 }
