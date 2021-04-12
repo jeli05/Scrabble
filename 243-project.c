@@ -183,6 +183,8 @@ int main(void) {
     int score2 = 0;
     int turnNumber1 = 0;
     int turnNumber2 = 0;
+    int bonusX = -1;
+    int bonusY = -1;
 
     video_text(1, 52, "PLAYER 1 TURN");
 
@@ -407,7 +409,11 @@ int main(void) {
 
     int tempScore1 = 0;
     int tempScore2 = 0;
+    int multiScore1 = 0;
+    int multiScore2 = 0;
     int multiplier = 1;
+    int repeatedScore1 = 0;
+    int repeatedScore2 = 0;
 
     highlight_tile(x, y);
 
@@ -773,6 +779,13 @@ int main(void) {
             if (index >= 0) { // display played tiles on board
                 int xcoord = selected_tile[0];
                 int ycoord = selected_tile[1];
+                // char* temp1[3];
+                // sprintf(temp1, "%d", xcoord);
+                // video_text(65, 20, temp1);
+                // char* temp2[3];
+                // sprintf(temp2, "%d", ycoord);
+                // video_text(68, 20, temp2);
+
                 if (player1Turn) {
                     if (board[ycoord][xcoord] == 0 && tempBoard[ycoord][xcoord] == 0) {
                         video_text(xcoord*3 + LEFT, ycoord*3 + TOP, rack1[index]); // switched xcoord and ycoord
@@ -791,8 +804,11 @@ int main(void) {
                         rack1[index] = " ";
                         inPlayValues[index] = rack1Values[index];
                         rack1Values[index] = " ";
-                        if (bonusWordSquares[ycoord][xcoord] != 1)
+                        if (bonusWordSquares[ycoord][xcoord] != 1) {
                             multiplier *= bonusWordSquares[ycoord][xcoord];
+                            bonusX = ycoord;
+                            bonusY = xcoord;
+                        }
                     }
                 } else {
                     if (board[ycoord][xcoord] == 0 && tempBoard[ycoord][xcoord] == 0) {
@@ -812,8 +828,11 @@ int main(void) {
                         rack2[index] = " ";
                         inPlayValues[index] = rack2Values[index];
                         rack2Values[index] = " ";
-                        if (bonusWordSquares[ycoord][xcoord] != 1)
+                        if (bonusWordSquares[ycoord][xcoord] != 1) {
                             multiplier *= bonusWordSquares[ycoord][xcoord];
+                            bonusX = ycoord;
+                            bonusY = xcoord;
+                        }
                     }
                 }
             }
@@ -865,8 +884,6 @@ int main(void) {
                                 // selected_tile[0] = 7;
                                 // selected_tile[1] = 7;
                                 //video_text(0, 14, "switched players");
-                                
-
 
                                 for (int i = 0; i < 15; i++) {
                                     for (int j = 0; j < 15; j++) {
@@ -877,41 +894,105 @@ int main(void) {
                                     }
                                 }
 
+                                int horizontal = 0;
+                                int vertical = 0;
+                                int firstTime = 1;
+                                int direction = 0; // 1 is for horizontal, 2 is for vertical
+
                                 for (int i = 0; i < 15; i++) {
                                     for (int j = 0; j < 15; j++) {
                                         if (tempBoard[i][j] == 0) continue;
-                                        // int right = i+1;
+                                        if (firstTime) {
+                                            horizontal = i;
+                                            vertical = j;
+                                            firstTime = 0;
+                                        }
+                                        if (i != horizontal) { // if x coord are different, it's vertical
+                                            vertical = j;
+                                            direction = 2;
+                                        }
+                                        if (j != vertical) { // if y coord are different, it's horizontal
+                                            horizontal = i;
+                                            direction = 1;
+                                        }
+
+                                        int num = 0;
                                         int rightLoop = 1;
                                         if (i+1 >= 15) rightLoop = 0;
                                         int advance = 0;
-                                        while (board[i+1+advance][j] != 0 && rightLoop) {
+                                        while (board[i+1+advance][j] != 0 && rightLoop) { // if letter does exist there
                                             wordBoard[i+1+advance][j] = board[i+1+advance][j];
+                                            num = 1;
                                             advance++;
                                             if (i+1+advance >= 15) break;
                                         }
+                                        // if (num) {
+                                        //     if (player1Turn) // player 2 just finished, ONLY DO THIS ONCE
+                                        //         repeatedScore2 += bonusLetterSquares[i][j]*tempBoard[i][j];
+                                        //     else if (!player1Turn)
+                                        //         repeatedScore1 += bonusLetterSquares[i][j]*tempBoard[i][j];
+                                        // }
+                                        
+                                        // num = 0;
                                         int leftLoop = 1;
                                         if (i-1 < 0) leftLoop = 0;
                                         advance = 0;
                                         while (board[i-1-advance][j] != 0 && leftLoop) {
                                             wordBoard[i-1-advance][j] = board[i-1-advance][j];
+                                            num = 1;
                                             advance++;
                                             if (i-1-advance < 0) break;
                                         }
+                                        // if (num) {
+                                        //     if (player1Turn) // player 2 just finished, ONLY DO THIS ONCE
+                                        //         repeatedScore2 += bonusLetterSquares[i][j]*tempBoard[i][j];
+                                        //     else if (!player1Turn)
+                                        //         repeatedScore1 += bonusLetterSquares[i][j]*tempBoard[i][j];
+                                        // }
+                                        
+                                        // num = 0;
                                         int downLoop = 1;
                                         if (j+1 >= 15) downLoop = 0;
                                         advance = 0;
                                         while (board[i][j+1+advance] != 0 && downLoop) {
                                             wordBoard[i][j+1+advance] = board[i][j+1+advance];
+                                            num = 1;
                                             advance++;
                                             if (j+1+advance >= 15) break;
                                         }
+                                        // if (num) {
+                                        //     if (player1Turn) // player 2 just finished, ONLY DO THIS ONCE
+                                        //         repeatedScore2 += bonusLetterSquares[i][j]*tempBoard[i][j];
+                                        //     else if (!player1Turn)
+                                        //         repeatedScore1 += bonusLetterSquares[i][j]*tempBoard[i][j];
+                                        // }
+
+                                        // num = 0;
                                         int upLoop = 1;
                                         if (j-1 < 0) upLoop = 0;
                                         advance = 0;
                                         while (board[i][j-1-advance] != 0 && upLoop) {
                                             wordBoard[i][j-1-advance] = board[i][j-1-advance];
+                                            num = 1;
                                             advance++;
                                             if (j-1-advance < 0) break;
+                                        }
+                                        if (num) {
+                                            if (player1Turn) // player 2 just finished, ONLY DO THIS ONCE
+                                                repeatedScore2 += bonusLetterSquares[i][j]*tempBoard[i][j];
+                                            else if (!player1Turn)
+                                                repeatedScore1 += bonusLetterSquares[i][j]*tempBoard[i][j];
+                                        }
+                                    }
+                                }
+
+                                for (int i = 0; i < 15; i++) {
+                                    for (int j = 0; j < 15; j++) {
+                                        if (wordBoard[i][j] != 0) {
+                                            if ((direction == 1 && horizontal == i) || (direction == 2 && vertical == j)) {
+                                                repeatedScore1 = 0;
+                                                repeatedScore2 = 0;
+                                            }
                                         }
                                     }
                                 }
@@ -928,27 +1009,37 @@ int main(void) {
                                         char* display[3];
                                         sprintf(display, "%d", wordBoard[i][j]);
                                         video_text(0+j, 37+i, display);
-                                        if (player1Turn)
-                                            tempScore2 += wordBoard[i][j];
-                                        else if (!player1Turn)
-                                            tempScore1 += wordBoard[i][j];
+                                        if (player1Turn) {
+                                            if (wordBoard[i][j] != 0 && (bonusX == i || bonusY == j))
+                                                multiScore2 += multiplier*wordBoard[i][j];
+                                            else
+                                                multiScore2 += wordBoard[i][j];
+                                        }
+                                        else if (!player1Turn) {
+                                            if (wordBoard[i][j] != 0 && (bonusX == i || bonusY == j))
+                                                multiScore1 += multiplier*wordBoard[i][j];
+                                            else
+                                                multiScore1 += wordBoard[i][j];
+                                        }
                                         tempBoard[i][j] = 0;
                                         wordBoard[i][j] = 0;
                                     }
                                 }
 
-                                // show/hide player turn message
+                                // show/hide player turn message and score tabulation
                                 if (player1Turn) {
                                     video_text(1, 52, "PLAYER 1 TURN");
                                     video_text(66, 52, "             ");
                                     char turnScore2[3];
-                                    sprintf(turnScore2, "%d", multiplier*tempScore2);
+                                    sprintf(turnScore2, "%d", multiplier*tempScore2 + multiScore2 + repeatedScore2);
                                     video_text(71, 8+turnNumber2, turnScore2);
-                                    score2 += multiplier*tempScore2;
+                                    score2 += multiplier*tempScore2 + multiScore2 + repeatedScore2;
                                     char displayScore2[4];
                                     sprintf(displayScore2, "%d", score2);
                                     video_text(73, 3, displayScore2); // to be updated after each turn
                                     tempScore2 = 0;
+                                    multiScore2 = 0;
+                                    repeatedScore2 = 0;
                                     multiplier = 1;
                                     video_text(73, 4, "0 "); // to be updated after each turn
                                     turnNumber2++;
@@ -957,13 +1048,15 @@ int main(void) {
                                     video_text(66, 52, "PLAYER 2 TURN");
                                     video_text(1, 52, "             ");
                                     char turnScore1[3];
-                                    sprintf(turnScore1, "%d", multiplier*tempScore1);
+                                    sprintf(turnScore1, "%d", multiplier*tempScore1 + multiScore1 + repeatedScore1);
                                     video_text(64, 8+turnNumber1, turnScore1);
-                                    score1 += multiplier*tempScore1;
+                                    score1 += multiplier*tempScore1 + multiScore1 + repeatedScore1;
                                     char displayScore1[4];
                                     sprintf(displayScore1, "%d", score1);
                                     video_text(8, 3, displayScore1); // to be updated after each turn
                                     tempScore1 = 0;
+                                    multiScore1 = 0;
+                                    repeatedScore1 = 0;
                                     multiplier = 1;
                                     video_text(8, 4, "0 "); // to be updated after each turn
                                     turnNumber1++;
