@@ -203,6 +203,8 @@ int main(void) {
     video_text(29, 52, "THESE ARE YOUR TILES:");
     video_text(29, 58, "TILES LEFT IN BAG:");
 
+    video_text(18, 3, "EXCHANGE TILES: PRESS 0, SELECT 1-7, PRESS 0.  ");
+
     int letterCount[27] = {9, 2, 2, 4, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1, 2};
     int bagSize = 100; // will be set to 100 when blank tiles are included
 
@@ -414,6 +416,9 @@ int main(void) {
     int multiplier = 1;
     int repeatedScore1 = 0;
     int repeatedScore2 = 0;
+    int exchange_on = 0;
+    int done = 0;
+    int selectedRackTiles[7] = {0, 0, 0, 0, 0, 0, 0};
 
     highlight_tile(x, y);
 
@@ -556,7 +561,13 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF016) {
+                                if (exchange_on) {
+                                    selectedRackTiles[0] = 1;
+                                    video_text(29+3*0, 56, "*");
+                                    break;
+                                }
                                 index = 0;
+                                video_text(29+3*0, 56, " ");
                                break;
                             }
                         }
@@ -573,7 +584,13 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF01E) {
+                                if (exchange_on) {
+                                    selectedRackTiles[1] = 1;
+                                    video_text(29+3*1, 56, "*");
+                                    break;
+                                }
                                 index = 1;
+                                video_text(29+3*1, 56, " ");
                                break;
                             }
                         }
@@ -590,7 +607,13 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF026) {
+                                if (exchange_on) {
+                                    selectedRackTiles[2] = 1;
+                                    video_text(29+3*2, 56, "*");
+                                    break;
+                                }
                                 index = 2;
+                                video_text(29+3*2, 56, " ");
                                break;
                             }
                         }
@@ -607,7 +630,13 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF025) {
+                                if (exchange_on) {
+                                    selectedRackTiles[3] = 1;
+                                    video_text(29+3*3, 56, "*");
+                                    break;
+                                }
                                 index = 3;
+                                video_text(29+3*3, 56, " ");
                                break;
                             }
                         }
@@ -624,7 +653,13 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF02E) {
+                                if (exchange_on) {
+                                    selectedRackTiles[4] = 1;
+                                    video_text(29+3*4, 56, "*");
+                                    break;
+                                }
                                 index = 4;
+                                video_text(29+3*4, 56, " ");
                                break;
                             }
                         }
@@ -642,7 +677,13 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF036) {
+                                if (exchange_on) {
+                                    selectedRackTiles[5] = 1;
+                                    video_text(29+3*5, 56, "*");
+                                    break;
+                                }
                                 index = 5;
+                                video_text(29+3*5, 56, " ");
                                break;
                             }
                         }
@@ -659,7 +700,13 @@ int main(void) {
 
                             //if the key is released
                             if (input2 == (char)0xF03D) {
+                                if (exchange_on) {
+                                    selectedRackTiles[6] = 1;
+                                    video_text(29+3*6, 56, "*");
+                                    break;
+                                }
                                 index = 6;
+                                video_text(29+3*6, 56, " ");
                                break;
                         }
                     }
@@ -886,11 +933,66 @@ int main(void) {
                      rack2[index] = "";
             }
 
+            // EXCHANGE BEGIN
+            if (input2 == (char)0x45) {
+                while (1) {
+                    PS2_data = *(PS2_ptr);
+                    int RVALID = PS2_data & 0x8000;
+
+                    if (RVALID) {
+                        input2 = PS2_data & 0xFFFFFF;
+
+                        //if the key is released
+                        if (input2 == (char)0xF045) {
+                            video_text(18, 3, "EXCHANGE OF LETTERS IN PROGRESS.               ");
+                            if (exchange_on) { // player is done selecting tiles to exchange
+                                for (int it = 0; it < 7; it++) {
+                                    if (selectedRackTiles[it] == 1) {
+                                        // update letter count to reflect tile taken out
+                                        for (int k = 0; k < 26; k++) {
+                                            if (player1Turn) {
+                                                if (rack1[it] == letters[k]) {
+                                                    letterCount[k] += 1;
+                                                    rack1[it] = " ";
+                                                    video_text(30+3*it, 55, rack1[it]);
+                                                    rack1Values[it] = " ";
+                                                    video_text(31+3*it, 56, rack1Values[it]);
+                                                    bagSize++;
+                                                    break;
+                                                }
+                                            }
+                                            else if (!player1Turn) {
+                                                if (rack2[it] == letters[k]) {
+                                                    letterCount[k] += 1;
+                                                    rack2[it] = " ";
+                                                    video_text(30+3*it, 55, rack2[it]);
+                                                    rack2Values[it] = " ";
+                                                    video_text(31+3*it, 56, rack2Values[it]);
+                                                    bagSize++;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                video_text(18, 3, "EXCHANGE OF LETTERS COMPLETED. PRESS ENTER NOW.");
+                                // input2 = (char)0x5A;
+                            }
+                            exchange_on = !exchange_on;
+                            break;
+                        }
+                    }
+                }
+            }
+            // EXCHANGE END
+
+
             /////////////////////////////////////////////////
             //IF THE PLAYER PRESSES ENTER (TO END THEIR TURN)
             /////////////////////////////////////////////////
             if (input2 == (char)0x5A) {
-
+                video_text(18, 3, "EXCHANGE TILES: PRESS 0, SELECT 1-7, PRESS 0.  ");
+                // video_text(18, 3, "                                               ");
                     while (1) {
                         PS2_data = *(PS2_ptr);
                         int RVALID = PS2_data & 0x8000;
@@ -1190,6 +1292,7 @@ int main(void) {
                                         video_text(30+3*i, 55, rack2[i]);
                                         video_text(31+3*i, 56, rack2Values[i]);
                                     }
+                                    video_text(29+3*i, 56, " ");
                                 }
 
                                 //char tempText[1] = " ";
@@ -1208,6 +1311,8 @@ int main(void) {
                         }
                     }
             }
+
+
 
             ///////////////////////////////////////////////////
             ///////////////////////////////////////////////////////
