@@ -126,11 +126,12 @@ void highlight_tile(int x, int y);
 void video_text(int x, int y, char * text_ptr);
 void color_tiles(int row, int col);
 void checkTileSelected(int PS2_data, int selected_x, int selected_y, char input2);
+char chooseLetter(char input2, int PS2_data);
 
 
 volatile int pixel_buffer_start; // global variable
-const char *letters[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
-const char *values[] = {"1", "3", "3", "3", "1", "4", "2", "4", "1", "8", "5", "1", "3", "1", "1", "3", "9", "1", "1", "1", "1", "4", "4", "8", "4", "9"};
+const char *letters[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "*"};
+const char *values[] = {"1", "3", "3", "3", "1", "4", "2", "4", "1", "8", "5", "1", "3", "1", "1", "3", "9", "1", "1", "1", "1", "4", "4", "8", "4", "9", "0"};
 // Q and Z may need to be given values of 9 instead of 10, or we can use X to represent 10
 // const char *values[] = {1, 3, 3, 3, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3, 9, 1, 1, 1, 1, 4, 4, 8, 4, 9};
 // int frequency[26] = {9, 2, 2, 4, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1};
@@ -151,7 +152,6 @@ int main(void) {
     int PS2_data, SW_data, KEY_data, RVALID;
     char input = 0;
 	char input2 = 0;
-    char pattern = 0;
 
     int HEX_bits = 0x0000000F;
 
@@ -203,8 +203,8 @@ int main(void) {
     video_text(29, 52, "THESE ARE YOUR TILES:");
     video_text(29, 58, "TILES LEFT IN BAG:");
 
-    int letterCount[26] = {9, 2, 2, 4, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1};
-    int bagSize = 98; // will be set to 100 when blank tiles are included
+    int letterCount[27] = {9, 2, 2, 4, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1, 2};
+    int bagSize = 100; // will be set to 100 when blank tiles are included
 
     // hold each player's tiles on rack
     char* rack1[8];
@@ -236,7 +236,7 @@ int main(void) {
         // create the array for the tile bag
         char *bag[bagSize];
         int subcounter = 0;
-        for (int a = 0; a < 26; a++) {
+        for (int a = 0; a < 27; a++) {
             for (int b = 0; b < letterCount[a]; b++) {
                 bag[subcounter] = letters[a];
                 subcounter++;
@@ -265,7 +265,7 @@ int main(void) {
         // video_text(1, 40+i, temp);
 
         // update letter count to reflect tile taken out
-        for (int j = 0; j < 26; j++) {
+        for (int j = 0; j < 27; j++) {
             if (bag[position] == letters[j]) {
                 if (letterCount[j] == 0)
                     video_text(1, 6, "FUCK");
@@ -771,11 +771,11 @@ int main(void) {
             //////////////////////////////////////////////////////////////////
         */
 
+            bool blankTilePlaced = false;
 
-
-            //
+            /////////
             //this is where letter selection gets handled
-            //
+            //////////////
             if (index >= 0) { // display played tiles on board
                 int xcoord = selected_tile[0];
                 int ycoord = selected_tile[1];
@@ -785,11 +785,25 @@ int main(void) {
                 // char* temp2[3];
                 // sprintf(temp2, "%d", ycoord);
                 // video_text(68, 20, temp2);
+                if (player1Turn && rack1[index] == "*") {
+                     blankTilePlaced = true;
+                }
+                else if (!player1Turn && rack2[index] == "*") {
+                     blankTilePlaced = true;
+                }
+                
 
                 if (player1Turn) {
                     if (board[ycoord][xcoord] == 0 && tempBoard[ycoord][xcoord] == 0) {
+
+
+
+
                         video_text(xcoord*3 + LEFT, ycoord*3 + TOP, rack1[index]); // switched xcoord and ycoord
                         video_text(xcoord*3 + LEFT+1, ycoord*3 + TOP+1, rack1Values[index]); // switched xcoord and ycoord
+
+
+
                         // board[ycoord][xcoord] = atoi(rack1Values[index]); // put value of tile on board
                         tempBoard[ycoord][xcoord] = atoi(rack1Values[index]);
                         tempScore1 += bonusLetterSquares[ycoord][xcoord]*atoi(rack1Values[index]);
@@ -835,6 +849,7 @@ int main(void) {
                         }
                     }
                 }
+
             }
 
             for (int i = 0; i < 7; i++) { // display rack tiles after each tile placing
@@ -847,6 +862,30 @@ int main(void) {
                     video_text(31+3*i, 56, rack2Values[i]);
                 }
             }
+
+            //////////////
+            //if the tile is blank
+            ////////////////
+            char tempChar[1] = "";
+            if (player1Turn && blankTilePlaced) {
+                     //video_text(60, 10, "p1 it's the blank tile!"); 
+                     tempChar[0] = chooseLetter(input2, PS2_data);
+                     //video_text(65, 15, "TEST1"); 
+                    // video_text(65, 16, tempChar[0]); 
+                     rack1[index] = &tempChar[0];
+                     video_text(selected_tile[0]*3 + LEFT, selected_tile[1]*3 + TOP, rack1[index]); 
+                     rack1[index] = "";
+            }
+            else if (!player1Turn && blankTilePlaced) {
+                     //video_text(60, 10, "p2 it's the blank tile!"); 
+                     tempChar[0] = chooseLetter(input2, PS2_data);
+                     //video_text(65, 15, "TEST1"); 
+                     //video_text(65, 16, tempChar[0]); 
+                     rack2[index] = &tempChar[0];
+                     video_text(selected_tile[0]*3 + LEFT, selected_tile[1]*3 + TOP, rack2[index]); 
+                     rack2[index] = "";
+            }
+
             /////////////////////////////////////////////////
             //IF THE PLAYER PRESSES ENTER (TO END THEIR TURN)
             /////////////////////////////////////////////////
@@ -1065,7 +1104,7 @@ int main(void) {
                                 for (int i = 0; i < 7; i++) {
                                     char *bag[bagSize]; // create the array for the tile bag
                                     int subcounter = 0;
-                                    for (int a = 0; a < 26; a++) {
+                                    for (int a = 0; a < 27; a++) {
                                         for (int b = 0; b < letterCount[a]; b++) {
                                             bag[subcounter] = letters[a];
                                             subcounter++;
@@ -1084,7 +1123,7 @@ int main(void) {
                                             rack1[i] = bag[pos];
                                             // video_text(30+3*i, 55, rack1[i]); // show new tile on rack
                                             // update letter count to reflect tile taken out
-                                            for (int j = 0; j < 26; j++) {
+                                            for (int j = 0; j < 27; j++) {
                                                 if (bag[pos] == letters[j]) {
                                                     if (letterCount[j] == 0)
                                                         video_text(1, 6, "FUCK");
@@ -1103,7 +1142,7 @@ int main(void) {
                                             rack2[i] = bag[pos];
                                             // video_text(30+3*i, 55, rack2[i]); // show new tile on rack
                                             // update letter count to reflect tile taken out
-                                            for (int j = 0; j < 26; j++) {
+                                            for (int j = 0; j < 27; j++) {
                                                 if (bag[pos] == letters[j]) {
                                                     if (letterCount[j] == 0)
                                                         video_text(1, 6, "FUCK");
@@ -1486,4 +1525,576 @@ void wait_for_vsync() {
     while ((status & 0x01) != 0) {
         status = *(pixel_ctrl_ptr + 3);
     }
+}
+
+
+char chooseLetter(char input2, int PS2_data) {
+
+    bool notDone = true;
+    //video_text(60, 30, "when does this get called");
+    char returnChar;
+
+    while(notDone) {
+
+        PS2_data = *(PS2_ptr);
+        int RVALID = PS2_data & 0x8000;
+
+        if (RVALID) {
+            input2 = PS2_data & 0xFFFF;
+            
+            //A
+            if (input2 == (char)0x1C) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF01C) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'A';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+            }
+
+            //B
+            if (input2 == (char)0x32) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF032) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'B';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+            }
+
+                //C
+                if (input2 == (char)0x21) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF021) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'C';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+
+                if (input2 == (char)0x23) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF023) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'D';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x24) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF024) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'E';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x2B) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF02B) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'F';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x34) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF034) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'G';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x33) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF033) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'H';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x43) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF043) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'I';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x3B) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF03B) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'J';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x42) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF042) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'K';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x4B) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF04B) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'L';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x3A) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF03A) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'M';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x31) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF031) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'N';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x44) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF044) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'O';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x4D) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF04D) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'P';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x15) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF015) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'Q';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x2D) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF02D) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'R';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x1B) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF01B) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'S';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x2C) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF02C) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'T';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x3C) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF03C) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'U';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x2A) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF02A) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'V';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x1D) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF01D) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'W';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x22) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF022) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'X';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    
+                }
+                }
+                if (input2 == (char)0x35) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF035) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'Y';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    }
+                }
+                if (input2 == (char)0x1A) {
+                while (1) {
+                        PS2_data = *(PS2_ptr);
+                        RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF01A) {
+                                //DO STUFF WITH THE KEY
+                                returnChar = 'Z';
+                                //video_text(60, 30, "wow this works");
+                                return returnChar;
+                                notDone = false;
+                               break;
+                            }
+                        }
+                    }
+                }
+            }   
+    }
+
+return "a";
+
 }
