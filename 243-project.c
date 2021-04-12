@@ -1524,7 +1524,7 @@ void color_square(int x, int y, short int color) {
      int x_coord = 68 + 12*x;
     int y_coord = 21 + 12*y;
 
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < 11; i++) {
         draw_line(x_coord+1, y_coord+1+i, x_coord+11, y_coord+1+i, color); //top line
     }
 
