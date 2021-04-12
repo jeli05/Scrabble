@@ -1262,6 +1262,8 @@ int main(void) {
                                     // sprintf(temp, "%d", bagSize);
                                     // video_text(1, 40+i, temp);
 
+                                    video_text(64, 23, "          ");
+
                                     char displayBagSize[3];
                                     sprintf(displayBagSize, "%d", bagSize);
                                     video_text(48, 58, displayBagSize);
@@ -1332,7 +1334,7 @@ int main(void) {
                             if (input2 == (char)0xF029) {
                                 
                                 //challenge the turn
-                                video_text(60, 20, "challenged!");
+                                video_text(64, 23, "challenge!");
 
                                 player1Turn = !player1Turn;
                                 
