@@ -163,6 +163,8 @@ int main(void) {
     y = 7;
     int gameOver = 2;
     int tilesPlacedThisTurn = 0;
+    int player1End = 0;
+    int player2End = 0;
     
 
     clear_screen();
@@ -288,6 +290,7 @@ int main(void) {
 
     int prevBoard[15][15];
     int prevTempBoard[15][15];
+    int boardCount = 0;
 
    for (int i = 0; i < 15; i++) {
         for (int j = 0; j < 15; j++) {
@@ -955,7 +958,7 @@ int main(void) {
                                         }
                                     }
                                 }
-                                video_text(18, 3, "EXCHANGE OF LETTERS COMPLETED. PRESS ENTER NOW.");
+                                video_text(18, 3, "EXCHANGE OF LETTERS COMPLETED. PRESS P NOW.");
                             }
                             exchange_on = !exchange_on;
                             break;
@@ -965,11 +968,8 @@ int main(void) {
             }
             // EXCHANGE END
 
-
-            /////////////////////////////////////////////////
-            //IF THE PLAYER PRESSES ENTER (TO END THEIR TURN)
-            /////////////////////////////////////////////////
-            if (input2 == (char)0x5A) {
+            // mutually agree to end the game
+            if (input2 == (char)0x49) {
                 video_text(18, 3, "                                               ");
                     while (1) {
                         PS2_data = *(PS2_ptr);
@@ -979,12 +979,44 @@ int main(void) {
                             input2 = PS2_data & 0xFFFFFF;
 
                             //if the key is released
-                            if (input2 == (char)0xF05A) {
-                                video_text(29, 52, "CHALLENGE? PRESS Y/N.");
-                                video_text(64, 25, "               ");
-                                video_text(64, 26, "               ");
-                                video_text(64, 27, "               ");
+                            if (input2 == (char)0xF049) {
+                                if (player1Turn) {
+                                    player1End = 1;
+                                    // video_text(29, 52, "THESE ARE YOUR TILES:");
+                                    video_text(17, 52, "DO YOU AGREE TO END THE GAME? IF YES PRESS .");
+                                    player1Turn = !player1Turn;
+                                }
+                                else if (!player1Turn) {
+                                    player2End = 1;
+                                    video_text(17, 52, "DO YOU AGREE TO END THE GAME? IF YES PRESS .");
+                                    player1Turn = !player1Turn;
+                                }
+                                if (player1End + player2End == 2)
+                                    gameOver = 0;
+                                break;
+                            }
+                        }
+                    }
+            }
 
+            // for passing
+            if (input2 == (char)0x4D) {
+                video_text(18, 3, "                                               ");
+                    while (1) {
+                        PS2_data = *(PS2_ptr);
+                        int RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF04D) {
+                                // video_text(64, 25, "               ");
+                                // video_text(64, 26, "               ");
+                                // video_text(64, 27, "               ");
+                                video_text(1, 40, "               ");
+                                video_text(1, 41, "               ");
+                                video_text(1, 42, "               ");
                                 for (int i = 0; i < 7; i++) {
 
                                    prevInPlay[i] = inPlay[i];
@@ -1199,16 +1231,348 @@ int main(void) {
                                     video_text(29+3*i, 56, " ");
                                 }
 
+
+                                // if (tilesPlacedThisTurn == 0) {
+                                //     gameOver--;
+                                // }
+                                // else {
+                                //     gameOver = 2;
+                                //     tilesPlacedThisTurn = 0;
+                                // }
+
+                                video_text(29, 52, "THESE ARE YOUR TILES:");
+
+                                for (int i = 0; i < 7; i++) {
+                                    if (bagSize == 0) break;
+                                    char *bag[bagSize]; // create the array for the tile bag
+                                    int subcounter = 0;
+                                    for (int a = 0; a < 27; a++) {
+                                        for (int b = 0; b < letterCount[a]; b++) {
+                                            bag[subcounter] = letters[a];
+                                            subcounter++;
+                                        }
+                                    }
+
+                                    // for (int j = 0; j < 80; j++) {
+                                    //     video_text(j, 53+i, bag[j]);
+                                    // }
+                                    
+                                    if (!player1Turn) { // Player 2 turn, refill Player 1 rack
+                                        if (rack1[i] == " ") {
+                                            int pos = rand() % bagSize; // pick random tile from bag
+                                            rack1[i] = bag[pos];
+                                            // video_text(30+3*i, 55, rack1[i]); // show new tile on rack
+                                            // update letter count to reflect tile taken out
+                                            for (int j = 0; j < 27; j++) {
+                                                if (bag[pos] == letters[j]) {
+                                                    letterCount[j] -= 1;
+                                                    rack1Values[i] = values[j];
+                                                    break;
+                                                }
+                                            }
+                                            bagSize--;
+                                        }
+                                    }
+
+                                    if (player1Turn) { // Player 1 turn, refill Player 2 rack
+                                        if (rack2[i] == " ") {
+                                            int pos = rand() % bagSize; // pick random tile from bag
+                                            rack2[i] = bag[pos];
+                                            // video_text(30+3*i, 55, rack2[i]); // show new tile on rack
+                                            // update letter count to reflect tile taken out
+                                            for (int j = 0; j < 27; j++) {
+                                                if (bag[pos] == letters[j]) {
+                                                    letterCount[j] -= 1;
+                                                    rack2Values[i] = values[j];
+                                                    break;
+                                                }
+                                            }
+                                            bagSize--;
+                                        }
+                                    }
+
+                                    // char temp[3];
+                                    // sprintf(temp, "%d", bagSize);
+                                    // video_text(1, 40+i, temp);
+
+                                    // video_text(64, 23, "          ");
+                                    video_text(1, 38, "          ");
+
+                                    char displayBagSize[3];
+                                    sprintf(displayBagSize, "%d", bagSize);
+                                    video_text(48, 58, displayBagSize);
+                                    if (bagSize < 10)
+                                        video_text(49, 58, " ");
+
+                                    // for (int k = 0; k < 26; k++) {
+                                    //     char temp1[3];
+                                    //     sprintf(temp1, "%d", letterCount[k]);
+                                    //     video_text(3+2*i, 10+k, temp1);
+                                    // }
+                                }
+                                if (bagSize == 0)
+                                    video_text(48, 58, "0");
+
+                                break;
+                            }
+                        }
+                    }
+            }
+
+            /////////////////////////////////////////////////
+            //IF THE PLAYER PRESSES ENTER (TO END THEIR TURN)
+            /////////////////////////////////////////////////
+            if (input2 == (char)0x5A) {
+                video_text(18, 3, "                                               ");
+                    while (1) {
+                        PS2_data = *(PS2_ptr);
+                        int RVALID = PS2_data & 0x8000;
+
+                        if (RVALID) {
+                            input2 = PS2_data & 0xFFFFFF;
+
+                            //if the key is released
+                            if (input2 == (char)0xF05A) {
+                                video_text(29, 52, "CHALLENGE? PRESS Y/N.");
+                                video_text(1, 40, "               ");
+                                video_text(1, 41, "               ");
+                                video_text(1, 42, "               ");
+                                // video_text(64, 25, "               ");
+                                // video_text(64, 26, "               ");
+                                // video_text(64, 27, "               ");
+
+                                for (int i = 0; i < 7; i++) {
+
+                                   prevInPlay[i] = inPlay[i];
+                                   prevInPlayValues[i] = inPlayValues[i];
+
+                                   if (player1Turn) {
+                                        previousRack[i] = rack1[i];
+                                        previousRackValues[i] = rack1Values[i];
+                                   }
+                                   else {
+                                        previousRack[i] = rack2[i];
+                                        previousRackValues[i] = rack2Values[i];
+                                   } 
+                                }
+                                //Switch the player turns
+                                player1Turn = !player1Turn;
+                                draw_board();
+                                highlight_tile(selected_tile[0], selected_tile[1]);
+                                // selected_tile[0] = 7;
+                                // selected_tile[1] = 7;
+                                //video_text(0, 14, "switched players");
+
+                                for (int i = 0; i < 15; i++) {
+                                    for (int j = 0; j < 15; j++) {
+                                        boardPreviousTurn[i][j] = boardThisTurn[i][j];
+                                        prevTempBoard[i][j] = tempBoard[i][j];
+                                        prevBoard[i][j] = board[i][j];
+                                        boardThisTurn[i][j] = 0;
+                                    }
+                                }
+
+                                int horizontal = 0;
+                                int vertical = 0;
+                                int firstTime = 1;
+                                int direction = 0; // 1 is for horizontal, 2 is for vertical
+                                int rackCounter = 0;
+
+                                for (int i = 0; i < 15; i++) {
+                                    for (int j = 0; j < 15; j++) {
+                                        if (tempBoard[i][j] == 0) continue;
+                                        rackCounter++;
+                                        if (firstTime) {
+                                            horizontal = i;
+                                            vertical = j;
+                                            firstTime = 0;
+                                        }
+                                        if (i != horizontal) { // if x coord are different, it's vertical
+                                            vertical = j;
+                                            direction = 2;
+                                        }
+                                        if (j != vertical) { // if y coord are different, it's horizontal
+                                            horizontal = i;
+                                            direction = 1;
+                                        }
+
+                                        int num = 0;
+                                        int rightLoop = 1;
+                                        if (i+1 >= 15) rightLoop = 0;
+                                        int advance = 0;
+                                        while (board[i+1+advance][j] != 0 && rightLoop) { // if letter does exist there
+                                            wordBoard[i+1+advance][j] = board[i+1+advance][j];
+                                            num = 1;
+                                            advance++;
+                                            if (i+1+advance >= 15) break;
+                                        }
+
+                                        int leftLoop = 1;
+                                        if (i-1 < 0) leftLoop = 0;
+                                        advance = 0;
+                                        while (board[i-1-advance][j] != 0 && leftLoop) {
+                                            wordBoard[i-1-advance][j] = board[i-1-advance][j];
+                                            num = 1;
+                                            advance++;
+                                            if (i-1-advance < 0) break;
+                                        }
+
+                                        int downLoop = 1;
+                                        if (j+1 >= 15) downLoop = 0;
+                                        advance = 0;
+                                        while (board[i][j+1+advance] != 0 && downLoop) {
+                                            wordBoard[i][j+1+advance] = board[i][j+1+advance];
+                                            num = 1;
+                                            advance++;
+                                            if (j+1+advance >= 15) break;
+                                        }
+
+                                        int upLoop = 1;
+                                        if (j-1 < 0) upLoop = 0;
+                                        advance = 0;
+                                        while (board[i][j-1-advance] != 0 && upLoop) {
+                                            wordBoard[i][j-1-advance] = board[i][j-1-advance];
+                                            num = 1;
+                                            advance++;
+                                            if (j-1-advance < 0) break;
+                                        }
+                                        if (num) {
+                                            if (player1Turn) // player 2 just finished, ONLY DO THIS ONCE
+                                                repeatedScore2 += bonusLetterSquares[i][j]*tempBoard[i][j];
+                                            else if (!player1Turn)
+                                                repeatedScore1 += bonusLetterSquares[i][j]*tempBoard[i][j];
+                                        }
+                                    }
+                                }
+
+                                video_text(1, 40, "                ");
+                                video_text(1, 41, "                ");
+
+                                int bingoScore = 0;
+                                if (rackCounter == 7) {
+                                    bingoScore = 50;
+                                    video_text(1, 40, "CONGRATS ON YOUR");
+                                    video_text(1, 41, "BINGO, PLAYER ");
+                                    if (!player1Turn)
+                                        video_text(15, 41, "1!");
+                                    else if (player1Turn)
+                                        video_text(15, 41, "2!");
+                                }
+
+                                for (int i = 0; i < 15; i++) {
+                                    for (int j = 0; j < 15; j++) {
+                                        if (wordBoard[i][j] != 0) {
+                                            if ((direction == 1 && horizontal == i) || (direction == 2 && vertical == j)) {
+                                                repeatedScore1 = 0;
+                                                repeatedScore2 = 0;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                for (int i = 0; i < 15; i++) {
+                                    for (int j = 0; j < 15; j++) {
+                                        board[i][j] += tempBoard[i][j];
+                                        if (board[i][j] != 0) boardCount++;
+                                        // char* temp[3];
+                                        // sprintf(temp, "%d", board[i][j]);
+                                        // video_text(0+j, 5+i, temp);
+                                        // char* tempB[3];
+                                        // sprintf(tempB, "%d", tempBoard[i][j]);
+                                        // video_text(0+j, 21+i, tempB);
+                                        // char* display[3];
+                                        // sprintf(display, "%d", wordBoard[i][j]);
+                                        // video_text(0+j, 37+i, display);
+                                        if (player1Turn) {
+                                            if (wordBoard[i][j] != 0 && (bonusX == i || bonusY == j))
+                                                multiScore2 += multiplier*wordBoard[i][j];
+                                            else
+                                                multiScore2 += wordBoard[i][j];
+                                        }
+                                        else if (!player1Turn) {
+                                            if (wordBoard[i][j] != 0 && (bonusX == i || bonusY == j))
+                                                multiScore1 += multiplier*wordBoard[i][j];
+                                            else
+                                                multiScore1 += wordBoard[i][j];
+                                        }
+                                        tempBoard[i][j] = 0;
+                                        wordBoard[i][j] = 0;
+                                    }
+                                }
+
+                                if (boardCount != 0) {
+                                    if (boardCount == 100) {
+                                        gameOver = 0;
+                                    }
+                                    boardCount = 0;
+                                }
+
+                                // show/hide player turn message and score tabulation
+                                if (player1Turn) {
+                                    video_text(1, 52, "PLAYER 1 TURN");
+                                    video_text(66, 52, "             ");
+                                    char turnScore2[3];
+                                    sprintf(turnScore2, "%d", multiplier*tempScore2 + multiScore2 + repeatedScore2 + bingoScore);
+                                    video_text(71, 8+turnNumber2, turnScore2);
+                                    prevScore = multiplier*tempScore2 + multiScore2 + repeatedScore2 + bingoScore;
+                                    score2 += multiplier*tempScore2 + multiScore2 + repeatedScore2 + bingoScore;
+                                    if (score2 < 10) video_text(74, 3, " ");
+                                    if (score2 < 100) video_text(75, 3, " ");
+                                    char displayScore2[4];
+                                    sprintf(displayScore2, "%d", score2);
+                                    video_text(73, 3, displayScore2); // to be updated after each turn
+                                    tempScore2 = 0;
+                                    multiScore2 = 0;
+                                    repeatedScore2 = 0;
+                                    multiplier = 1;
+                                    // video_text(73, 4, "0 "); // to be updated after each turn
+                                    turnNumber2++;
+                                }
+                                else if (!player1Turn) {
+                                    video_text(66, 52, "PLAYER 2 TURN");
+                                    video_text(1, 52, "             ");
+                                    char turnScore1[3];
+                                    sprintf(turnScore1, "%d", multiplier*tempScore1 + multiScore1 + repeatedScore1 + bingoScore);
+                                    video_text(64, 8+turnNumber1, turnScore1);
+                                    prevScore = multiplier*tempScore1 + multiScore1 + repeatedScore1 + bingoScore;
+                                    score1 += multiplier*tempScore1 + multiScore1 + repeatedScore1 + bingoScore;
+                                    if (score1 < 10) video_text(9, 3, " ");
+                                    if (score1 < 100) video_text(10, 3, " ");
+                                    char displayScore1[4];
+                                    sprintf(displayScore1, "%d", score1);
+                                    video_text(8, 3, displayScore1); // to be updated after each turn
+                                    tempScore1 = 0;
+                                    multiScore1 = 0;
+                                    repeatedScore1 = 0;
+                                    multiplier = 1;
+                                    // video_text(8, 4, "0 "); // to be updated after each turn
+                                    turnNumber1++;
+                                }
+
+
+
+                                for (int i = 0; i < 7; i++) { // display rack tiles after each tile placing
+                                    if (player1Turn) {
+                                        video_text(30+3*i, 55, rack1[i]);
+                                        video_text(31+3*i, 56, rack1Values[i]);
+                                    }
+                                    else if (!player1Turn) {
+                                        video_text(30+3*i, 55, rack2[i]);
+                                        video_text(31+3*i, 56, rack2Values[i]);
+                                    }
+                                    video_text(29+3*i, 56, " ");
+                                }
+
                                 //char tempText[1] = " ";
                                 //sprintf(tempText, "%d", gameOver);
                                 //video_text(66, 30, tempText);
-                                if (tilesPlacedThisTurn == 0) {
-                                    gameOver--;
-                                }
-                                else {
-                                    gameOver = 2;
-                                    tilesPlacedThisTurn = 0;
-                                }
+                                // if (tilesPlacedThisTurn == 0) {
+                                //     gameOver--;
+                                // }
+                                // else {
+                                //     gameOver = 2;
+                                //     tilesPlacedThisTurn = 0;
+                                // }
 
                                 break;
                             }
@@ -1226,14 +1590,19 @@ int main(void) {
 
                         //if the key is released
                         if (input2 == (char)0xF031) {
-                            if (challenge) { // N pressed during challenge, not successful
-                                video_text(64, 25, "UNSUCCESSFUL   ");
-                                video_text(64, 26, "CHALLENGE      ");
-                                video_text(64, 27, "PRESS ENTER NOW");
-                                challenge = 0;
-                            }
                             if (!challenge)
                                 video_text(29, 52, "THESE ARE YOUR TILES:");
+
+                            if (challenge) { // N pressed during challenge, not successful
+                                video_text(1, 40, "UNSUCCESSFUL   ");
+                                video_text(1, 41, "CHALLENGE      ");
+                                video_text(1, 42, "               ");
+                                video_text(29, 52, "PRESS P NOW          ");
+                                // video_text(64, 25, "UNSUCCESSFUL   ");
+                                // video_text(64, 26, "CHALLENGE      ");
+                                // video_text(64, 27, "PRESS ENTER NOW");
+                                challenge = 0;
+                            }
 
                             for (int i = 0; i < 7; i++) {
                                 if (bagSize == 0) break;
@@ -1288,7 +1657,8 @@ int main(void) {
                                 // sprintf(temp, "%d", bagSize);
                                 // video_text(1, 40+i, temp);
 
-                                video_text(64, 23, "          ");
+                                // video_text(64, 23, "          ");
+                                video_text(1, 38, "          ");
 
                                 char displayBagSize[3];
                                 sprintf(displayBagSize, "%d", bagSize);
@@ -1304,6 +1674,7 @@ int main(void) {
                             }
                             if (bagSize == 0)
                                 video_text(48, 58, "0");
+                            first = 1;
                             break;
                         }
                     }
@@ -1327,14 +1698,18 @@ int main(void) {
                                     first = 0;
                                     break;
                                 }
+                                first = 1;
                                 if (!challenge) successful = 1;
                                 // if (challenge) successful = 0;
                                 if (successful) { // don't replace tiles
                                     video_text(29, 52, "THESE ARE YOUR TILES:");
                                     successful = 0;
-                                    video_text(64, 25, "SUCCESSFUL     ");
-                                    video_text(64, 26, "CHALLENGE      ");
-                                    video_text(64, 27, "STILL YOUR TURN");
+                                    video_text(1, 40, "SUCCESSFUL     ");
+                                    video_text(1, 41, "CHALLENGE      ");
+                                    video_text(1, 42, "STILL YOUR TURN");
+                                    // video_text(64, 25, "SUCCESSFUL     ");
+                                    // video_text(64, 26, "CHALLENGE      ");
+                                    // video_text(64, 27, "STILL YOUR TURN");
                                     int counter = 0;
                                     for (int i = 0; i < 15; i++) {
                                         for (int j = 0; j < 15; j++) {
@@ -1371,7 +1746,7 @@ int main(void) {
                                     if (!player1Turn) { // need to replenish rack with placed tiles
                                         for (int it = 0; it < 7; it++) { // display rack tiles after each tile placing {
                                             if (rack1[it] == " ") {
-                                                video_text(63, 8+turnNumber1-1, "-");
+                                                video_text(64, 8+turnNumber1-1, "---");
                                                 rack1[it] = tempRack[counter];
                                                 rack1Values[it] = tempRackValues[counter];
                                                 tempRack[counter] = " ";
@@ -1395,7 +1770,7 @@ int main(void) {
                                     else if (player1Turn) {
                                         for (int it = 0; it < 7; it++) { // display rack tiles after each tile placing {
                                             if (rack2[it] == " ") {
-                                                video_text(70, 8+turnNumber2-1, "-");
+                                                video_text(71, 8+turnNumber2-1, "---");
                                                 rack2[it] = tempRack[counter];
                                                 rack2Values[it] = tempRackValues[counter];
                                                 tempRack[counter] = " ";
@@ -1618,16 +1993,29 @@ int main(void) {
         } //THIS IS THE END OF THE WHILE LOOP
     }
 
-    video_text(66, 28, "GAME OVER");
+    video_text(17, 52, "GAME OVER        ");
+    video_text(52, 52, "GAME OVER        ");
+
     if (score1 > score2) {
-        video_text(65, 30, "Player 1 wins!");
+        video_text(33, 52, "Player 1 wins!     ");
     }
     else if (score1 < score2) {
-        video_text(65, 30, "Player 2 wins!");
+        video_text(33, 52, "Player 2 wins!     ");
     }
     else {
-        video_text(65, 30, "It's a tie!");
+        video_text(33, 52, "It's a tie!        ");
     }
+
+    // video_text(66, 28, "GAME OVER");
+    // if (score1 > score2) {
+    //     video_text(65, 30, "Player 1 wins!");
+    // }
+    // else if (score1 < score2) {
+    //     video_text(65, 30, "Player 2 wins!");
+    // }
+    // else {
+    //     video_text(65, 30, "It's a tie!");
+    // }
 }
 
 void setupText() {
@@ -1656,7 +2044,7 @@ void setupText() {
     video_text(1, 12, " TO RETURN TILE");
 
     video_text(1, 14, "TO PASS:");
-    video_text(1, 15, " HIT ENTER");
+    video_text(1, 15, " PRESS P");
     video_text(1, 17, "TO EXCHANGE:");
     video_text(1, 18, " PRESS 0");
     video_text(1, 19, " PRESS 1-7 TO");
@@ -1669,12 +2057,18 @@ void setupText() {
     video_text(1, 27, " TURN, BINGO!");
     video_text(1, 28, "+5O BONUS POINTS");
 
-    video_text(1, 30, "WHEN IT SAYS");
-    video_text(1, 31, " CHALLENGE Y/N");
-    video_text(1, 32, " RIGHT AFTER AN");
-    video_text(1, 33, " SUCCESSFUL");
-    video_text(1, 34, " CHALLENGE");
-    video_text(1, 35, " JUST PRESS NO:N");
+    video_text(1, 30, "TO END THE GAME");
+    video_text(1, 31, " BY MUTUAL");
+    video_text(1, 32, " CONSENT, BOTH");
+    video_text(1, 33, " PLAYERS MUST");
+    video_text(1, 34, " PRESS .");
+
+    // video_text(1, 30, "WHEN IT SAYS");
+    // video_text(1, 31, " CHALLENGE Y/N");
+    // video_text(1, 32, " RIGHT AFTER AN");
+    // video_text(1, 33, " SUCCESSFUL");
+    // video_text(1, 34, " CHALLENGE");
+    // video_text(1, 35, " JUST PRESS NO:N");
 }
 
 void draw_board() {
